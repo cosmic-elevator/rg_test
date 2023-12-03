@@ -66,7 +66,10 @@ MusicChannel = pygame.mixer.Channel(1)
 clock = pygame.time.Clock()
 music_start_time = 0
 music_playtime = 0
+global combo
 combo = 0
+global rate
+rate = ""
 
 notequeue_1 = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4), Note(1, 5), Note(1, 6), Note(1, 7), Note(1, 8)]
 notequeue_2 = [Note(2, 1), Note(2, 2)]
@@ -113,47 +116,46 @@ def drop_notes():
 
 
 def timing(note):
+    global rate
+    global combo
     key_press_time = pygame.time.get_ticks()
     diff_time = key_press_time - note.exact_hit_time*1000 - music_start_time
-    #print(diff_time)
+    print(diff_time)
     
     if abs(diff_time) <= 30:
         print('Perfect!')
-        rate = "perfect"
+        rate = "Perfect!"
         remove_note(note)
         combo += 1
-        SCREEN.blit(mediumfont.render("Perfect!", True, YELLOW), (540, 400))
     elif abs(diff_time) <= 70:
         print('Great')
-        rate = "great"
+        rate = "Great"
         remove_note(note)
         combo += 1
-        SCREEN.blit(mediumfont.render("Great", True, YELLOW), (540, 400))
     elif abs(diff_time) <= 100:
         print('Good')
-        rate = "good"
+        rate = "Good"
         remove_note(note)
         combo += 1
-        SCREEN.blit(mediumfont.render("Good", True, YELLOW), (540, 400))
     elif abs(diff_time) <= 300:
         print('OK')
-        rate = "ok"
+        rate = "OK"
         remove_note(note)
         combo = 0
-        SCREEN.blit(mediumfont.render("OK", True, YELLOW), (540, 400))
     elif abs(diff_time) <= 800:
         print('Break')
-        rate = "break"
+        rate = "Break"
         remove_note(note)
         combo = 0
-        SCREEN.blit(mediumfont.render("Break", True, YELLOW), (540, 400))
        
 
 def miss_check(note):
+    global combo
+    global rate
     if note.rect.y >= 570:
         print('Miss')
         combo = 0
-        SCREEN.blit(mediumfont.render("Miss", True, YELLOW), (540, 400))
+        rate = "Miss"
         remove_note(note)
         
 
@@ -172,6 +174,8 @@ while is_running:
         SCREEN.blit(pink_keybeam, (640, 0))
     if pygame.key.get_pressed()[pygame.K_k]:
         SCREEN.blit(pink_keybeam, (740, 0))
+
+    SCREEN.blit(mediumfont.render(rate, True, YELLOW), (560, 400))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
