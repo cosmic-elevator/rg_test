@@ -58,7 +58,6 @@ smallfont = pygame.font.Font(None, 40)
 mediumfont = pygame.font.Font(None, 50)
 bigfont = pygame.font.Font(None, 80)
 
-playbutton = pygame.image.load('playbutton.png')
 pink_keybeam = pygame.image.load('pink_keybeam.png')
 judgeline = pygame.Rect(WIDTH/2-100, HEIGHT/2, 200, 10)
 pygame.mixer.music.load('test.wav')
@@ -67,6 +66,7 @@ MusicChannel = pygame.mixer.Channel(1)
 clock = pygame.time.Clock()
 music_start_time = 0
 music_playtime = 0
+combo = 0
 
 notequeue_1 = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4), Note(1, 5), Note(1, 6), Note(1, 7), Note(1, 8)]
 notequeue_2 = [Note(2, 1), Note(2, 2)]
@@ -115,34 +115,44 @@ def drop_notes():
 def timing(note):
     key_press_time = pygame.time.get_ticks()
     diff_time = key_press_time - note.exact_hit_time*1000 - music_start_time
-    print(diff_time)
+    #print(diff_time)
     
     if abs(diff_time) <= 30:
         print('Perfect!')
-        SCREEN.blit(mediumfont.render("Perfect!", True, YELLOW), (540, 400))
+        rate = "perfect"
         remove_note(note)
+        combo += 1
+        SCREEN.blit(mediumfont.render("Perfect!", True, YELLOW), (540, 400))
     elif abs(diff_time) <= 70:
         print('Great')
-        SCREEN.blit(mediumfont.render("Great", True, YELLOW), (540, 400))
+        rate = "great"
         remove_note(note)
+        combo += 1
+        SCREEN.blit(mediumfont.render("Great", True, YELLOW), (540, 400))
     elif abs(diff_time) <= 100:
         print('Good')
-        SCREEN.blit(mediumfont.render("Good", True, YELLOW), (540, 400))
+        rate = "good"
         remove_note(note)
+        combo += 1
+        SCREEN.blit(mediumfont.render("Good", True, YELLOW), (540, 400))
     elif abs(diff_time) <= 300:
         print('OK')
-        SCREEN.blit(mediumfont.render("OK", True, YELLOW), (540, 400))
+        rate = "ok"
         remove_note(note)
+        combo = 0
+        SCREEN.blit(mediumfont.render("OK", True, YELLOW), (540, 400))
     elif abs(diff_time) <= 800:
         print('Break')
-        SCREEN.blit(mediumfont.render("Break", True, YELLOW), (540, 400))
+        rate = "break"
         remove_note(note)
-    
+        combo = 0
+        SCREEN.blit(mediumfont.render("Break", True, YELLOW), (540, 400))
        
 
 def miss_check(note):
-    if note.rect.y >= 720:
+    if note.rect.y >= 570:
         print('Miss')
+        combo = 0
         SCREEN.blit(mediumfont.render("Miss", True, YELLOW), (540, 400))
         remove_note(note)
         
@@ -207,7 +217,6 @@ while is_running:
             miss_check(notequeue_3[0])
         if notequeue_4:                   
             miss_check(notequeue_4[0])
-        
         
         
 
