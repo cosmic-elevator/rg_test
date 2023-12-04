@@ -41,6 +41,7 @@ pygame.mixer.init()
 smallfont = pygame.font.Font("font/kotra_hope.ttf", 30)
 mediumfont = pygame.font.Font("font/kotra_hope.ttf", 45)
 bigfont = pygame.font.Font("font/kotra_hope.ttf", 50)
+combofont = pygame.font.Font("font/dangam.ttf", 66)
 
 class Note(pygame.sprite.Sprite):
     def __init__(self, linenum, exact_hit_time):
@@ -64,23 +65,28 @@ pygame.display.set_caption('rhythm game test')
 is_running = True
 gamemode = 0
 songlist_cursor = 0
+pos = (0, 0)
+
+songlist_boxes = []
+for i in range(len(song_info_list)):
+    songlist_boxes.append(pygame.Rect(640, (120*i+110), 560, 100))
+backbutton_rect = pygame.Rect(130, 565, 75, 50)
+forwardbutton_rect = pygame.Rect(435, 565, 75, 50)
 
 judgeline = pygame.Rect(WIDTH/2-100, HEIGHT/2, 200, 10)
-pygame.mixer.music.load('test.wav')
 MusicChannel = pygame.mixer.Channel(1)
+SoundFXChannel = pygame.mixer.Channel(2)
 
 clock = pygame.time.Clock()
 music_start_time = 0
 music_playtime = 0
-global combo
+is_tutorial = False
+global combo, max_combo, rate, key_press_time, miss_check_time, play_score
 combo = 0
-global rate
+max_combo = 0
 rate = ""
-global key_press_time
 key_press_time = 0
-global miss_check_time
 miss_check_time = 0
-global play_score
 play_score = 0
 # Perfect! / Great / Good / OK / Break / Miss
 timing_count = [0, 0, 0, 0, 0, 0]
@@ -95,7 +101,7 @@ notequeue_4 = [Note(4, 5), Note(4, 6)]
 
 def music_play():
     if not pygame.mixer.get_busy():
-        MusicChannel.play(pygame.mixer.Sound('test.wav'))
+        MusicChannel.play(pygame.mixer.Sound('song/test.wav'))
 
 
 def remove_note(note):
@@ -189,6 +195,16 @@ def show_timing(rate):
 
 def show_combo():
     global combo
+    if pygame.time.get_ticks() - key_press_time < 250:
+        combo_text = combofont.render(str(combo), True, WHITE)
+        SCREEN.blit(combo_text, combo_text.get_rect(center=(WIDTH/2, 200)))
+
+
+def check_max_combo():
+    global combo
+    global max_combo
+    if combo > max_combo:
+        max_combo = combo
 
 
 while is_running:
@@ -201,6 +217,7 @@ while is_running:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
                     gamemode = 2    # T를 누르면 튜토리얼 플레이 화면으로 전환
+                    is_tutorial = True
                 elif event.key == pygame.K_SPACE:
                     gamemode = 1
                 
@@ -208,13 +225,51 @@ while is_running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                for i in range(len(songlist_boxes)):
+                    if songlist_boxes[i].collidepoint(pos):
+                        songlist_cursor = i
+                        
+                if backbutton_rect.collidepoint(pos):
+                    songlist_cursor = (songlist_cursor - 1) % len(song_info_list)
+
+                if forwardbutton_rect.collidepoint(pos):
+                    songlist_cursor = (songlist_cursor + 1) % len(song_info_list)
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    gamemode = 0
+
+                if event.key == pygame.K_UP:
+                    songlist_cursor = (songlist_cursor - 1) % len(song_info_list)
+
+                if event.key == pygame.K_DOWN:
+                    songlist_cursor = (songlist_cursor + 1) % len(song_info_list)
+
         SCREEN.fill(GREEN)
         pygame.draw.rect(SCREEN, YELLOW, (0, 0, 1280, 70))
         SCREEN.blit(mediumfont.render("SONG SELECT", True, BLACK), (50, 15))
-        pygame.draw.rect(SCREEN, WHITE, [130, 110, 380, 380])
-        SCREEN.blit(mediumfont.render(song_info_list[songlist_cursor][0], True, BLACK), (150, 350))
-        SCREEN.blit(smallfont.render(song_info_list[songlist_cursor][1], True, BLACK), (150, 400))
-        SCREEN.blit(smallfont.render(song_info_list[songlist_cursor][2], True, BLACK), (150, 440))
+        #pygame.draw.rect(SCREEN, RED, [130, 110, 380, 380])
+        SCREEN.blit(song_info_list[songlist_cursor][3], (130, 110))
+        SCREEN.blit(cover_gradient_bg, (130, 110))
+        SCREEN.blit(mediumfont.render(song_info_list[songlist_cursor][0], True, WHITE), (150, 350))
+        SCREEN.blit(smallfont.render(song_info_list[songlist_cursor][1], True, WHITE), (150, 400))
+        SCREEN.blit(smallfont.render(song_info_list[songlist_cursor][2], True, WHITE), (150, 440))
+        SCREEN.blit(playbutton, (260, 530))
+        SCREEN.blit(backbutton, (130, 565))
+        SCREEN.blit(forwardbutton, (435, 565))
+
+        for i in range(len(song_info_list)):
+            if songlist_cursor == i:
+                pygame.draw.rect(SCREEN, YELLOW, [640, (120*i+110), 560, 100])
+                SCREEN.blit(smallfont.render(song_info_list[i][0], True, BLACK), (660, 120*i+125))
+                SCREEN.blit(smallfont.render(song_info_list[i][1], True, BLACK), (660, 120*i+155))
+            else:
+                pygame.draw.rect(SCREEN, BLACK, [640, (120*i+110), 560, 100])
+                SCREEN.blit(smallfont.render(song_info_list[i][0], True, WHITE), (660, 120*i+125))
+                SCREEN.blit(smallfont.render(song_info_list[i][1], True, WHITE), (660, 120*i+155))
         
         
 
@@ -240,6 +295,9 @@ while is_running:
                 is_running = False
 
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    gamemode = 1
+
                 if event.key == pygame.K_UP:
                     music_play()
                     music_start_time = pygame.time.get_ticks()
@@ -270,6 +328,8 @@ while is_running:
                             continue
 
         show_timing(rate)
+        show_combo()
+        check_max_combo()
             
         if music_start_time > 0 and music_playtime <= 8000:
             music_playtime = pygame.time.get_ticks() - music_start_time
@@ -285,11 +345,8 @@ while is_running:
                 
 
         SCREEN.blit(bigfont.render(str(music_playtime/1000), True, WHITE), (20, 20))
-                
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            is_running = False
-
+        SCREEN.blit(bigfont.render("SCORE: " + str(play_score), True, WHITE), (50, 580))
+        SCREEN.blit(bigfont.render("MAX COMBO: " + str(max_combo), True, WHITE), (50, 630))
 
     pygame.display.flip()
     clock.tick(FPS)
