@@ -61,8 +61,8 @@ class Note(pygame.sprite.Sprite):
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('rhythm game test')
 
-global is_running
 is_running = True
+gamemode = 0
 
 judgeline = pygame.Rect(WIDTH/2-100, HEIGHT/2, 200, 10)
 pygame.mixer.music.load('test.wav')
@@ -90,24 +90,6 @@ notequeue_2 = [Note(2, 1), Note(2, 2)]
 notequeue_3 = [Note(3, 3), Note(3, 4)]
 notequeue_4 = [Note(4, 5), Note(4, 6)]
 
-
-def start_screen():
-    global is_running
-    SCREEN.blit(startscreen_img, (0, 0))
-    SCREEN.blit(bigfont.render("아무 키나 눌러서 시작하세요", True, WHITE), )
-    while is_running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-            if event.type == pygame.KEYDOWN:
-                song_select_screen()
-
-        pygame.display.flip()
-        clock.tick(FPS)
-
-
-def song_select_screen():
-    print("asdf")
 
 
 def music_play():
@@ -208,13 +190,23 @@ def show_combo():
     global combo
 
 
+while is_running:
+    if gamemode == 0:       ## 시작 화면
+        SCREEN.blit(startscreen_img, (0, 0))
+        SCREEN.blit(bigfont.render("튜토리얼을 진행하려면 T,\n바로 플레이하려면 Space를 눌러주세요.", True, WHITE), (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_t:
+                    gamemode = 2    # T를 누르면 튜토리얼 플레이 화면으로 전환
+                elif event.key == pygame.K_SPACE:
+                    gamemode = 1
+                
+    if gamemode == 1:       ## 곡 선택 화면
+        SCREEN.fill(BLACK)
 
-
-
-
-
-def game():
-    while is_running:
+    if gamemode == 2:       ## 플레이 화면
         SCREEN.fill(BLACK)
         pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
 
@@ -229,7 +221,7 @@ def game():
         if pygame.key.get_pressed()[pygame.K_k]:
             SCREEN.blit(pink_keybeam, (740, 0))
 
-        #SCREEN.blit(mediumfont.render(rate, True, YELLOW), (560, 400))
+            #SCREEN.blit(mediumfont.render(rate, True, YELLOW), (560, 400))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -239,7 +231,7 @@ def game():
                 if event.key == pygame.K_UP:
                     music_play()
                     music_start_time = pygame.time.get_ticks()
-                    
+                        
                 if event.key == pygame.K_d:
                     if music_start_time > 0:
                         try:
@@ -266,7 +258,7 @@ def game():
                             continue
 
         show_timing(rate)
-        
+            
         if music_start_time > 0 and music_playtime <= 8000:
             music_playtime = pygame.time.get_ticks() - music_start_time
             if notequeue_1:                   
@@ -277,14 +269,14 @@ def game():
                 miss_check(notequeue_3[0])
             if notequeue_4:                   
                 miss_check(notequeue_4[0])
-            
-            
+                
+                
 
         SCREEN.blit(bigfont.render(str(music_playtime/1000), True, WHITE), (20, 20))
-            
+                
 
-        pygame.display.flip()
-        clock.tick(FPS)
+    pygame.display.flip()
+    clock.tick(FPS)
 
 
-start_screen()
+pygame.quit()
