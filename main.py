@@ -1,4 +1,5 @@
 import pygame
+from settings import *
 
 '''
 
@@ -18,7 +19,14 @@ import pygame
 
 오늘 해야 할 것들
 무엇을 할 것인가 ~ 우리 게임의 시급한 문제 ~
->> 판정 애니메이션 << 
+약간 팝픈뮤직 느낌?
+메뉴 음악 / 로비 음악
+아이캐치
+판정 애니메이션
+메인 화면 만들기 
+
+>> 디자인은 나중에, 기능 구현을 먼저!! <<
+필요한 기능
 
 
 '''
@@ -30,15 +38,18 @@ import pygame
 pygame.init()
 pygame.mixer.init()
 
+smallfont = pygame.font.Font("font/kotra_hope.ttf", 40)
+mediumfont = pygame.font.Font("font/kotra_hope.ttf", 50)
+bigfont = pygame.font.Font("font/kotra_hope.ttf", 80)
 
 class Note(pygame.sprite.Sprite):
     def __init__(self, linenum, exact_hit_time):
         super(Note, self).__init__()
         self.linenum = linenum
         self.exact_hit_time = exact_hit_time
-        self.image = pygame.image.load('purple_note.png')
+        self.image = pygame.image.load('img/purple_note.png')
         self.rect = self.image.get_rect()
-        self.rect.x = 440 + (linenum - 1) * 100  #
+        self.rect.x = 440 + (linenum - 1) * 100
         self.rect.y = 0
 
     def drop(self):
@@ -47,21 +58,12 @@ class Note(pygame.sprite.Sprite):
         
     
 
-
-WIDTH = 1280
-HEIGHT = 720
-FPS = 60
-SPEED = 10  # 1프레임당 내려오는 노트의 픽셀
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-
 pygame.display.set_caption('rhythm game test')
 
-smallfont = pygame.font.Font(None, 40)
-mediumfont = pygame.font.Font(None, 50)
-bigfont = pygame.font.Font(None, 80)
+global is_running
+is_running = True
 
-pink_keybeam = pygame.image.load('pink_keybeam.png')
-timing_perfect_img = pygame.image.load('timing_perfect_1.png')
 judgeline = pygame.Rect(WIDTH/2-100, HEIGHT/2, 200, 10)
 pygame.mixer.music.load('test.wav')
 MusicChannel = pygame.mixer.Channel(1)
@@ -75,18 +77,37 @@ global rate
 rate = ""
 global key_press_time
 key_press_time = 0
+global miss_check_time
+miss_check_time = 0
+global play_score
+play_score = 0
+# Perfect! / Great / Good / OK / Break / Miss
+timing_count = [0, 0, 0, 0, 0, 0]
+
 
 notequeue_1 = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4), Note(1, 5), Note(1, 6), Note(1, 7), Note(1, 8)]
 notequeue_2 = [Note(2, 1), Note(2, 2)]
 notequeue_3 = [Note(3, 3), Note(3, 4)]
 notequeue_4 = [Note(4, 5), Note(4, 6)]
-266
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 255)
+
+
+def start_screen():
+    global is_running
+    SCREEN.blit(startscreen_img, (0, 0))
+    SCREEN.blit(bigfont.render("아무 키나 눌러서 시작하세요", True, WHITE), )
+    while is_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+            if event.type == pygame.KEYDOWN:
+                song_select_screen()
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def song_select_screen():
+    print("asdf")
 
 
 def music_play():
@@ -125,7 +146,7 @@ def timing(note):
     global combo
     global key_press_time
     key_press_time = pygame.time.get_ticks()
-    diff_time = key_press_time - note.exact_hit_time*1000 - music_start_time
+    diff_time = key_press_time - note.exact_hit_time * 1000 - music_start_time
     print(diff_time)
     
     if abs(diff_time) <= 30:
@@ -158,17 +179,29 @@ def timing(note):
 def miss_check(note):
     global combo
     global rate
+    global miss_check_time
     if note.rect.y >= 570:
         print('Miss')
         combo = 0
         rate = "Miss"
+        miss_check_time = pygame.time.get_ticks()
         remove_note(note)
         
 
 def show_timing(rate):
-    if pygame.time.get_ticks() - key_press_time < 250:      # 0.25초 동안 판정 보여주기 
+    if pygame.time.get_ticks() - key_press_time < 250 or pygame.time.get_ticks() - miss_check_time < 250:      # 0.25초 동안 판정 보여주기 
         if rate == "Perfect!":
             SCREEN.blit(timing_perfect_img, (490, 400))
+        elif rate == "Great":
+            SCREEN.blit(timing_great_img, (490, 400))
+        elif rate == "Good":
+            SCREEN.blit(timing_good_img, (490, 400))
+        elif rate == "OK":
+            SCREEN.blit(timing_ok_img, (490, 400))
+        elif rate == "Break":
+            SCREEN.blit(timing_break_img, (490, 400))
+        elif rate == "Miss":
+            SCREEN.blit(timing_miss_img, (490, 400))
 
 
 def show_combo():
@@ -176,78 +209,82 @@ def show_combo():
 
 
 
-is_running = True
-while is_running:
-    SCREEN.fill(BLACK)
-    pygame.draw.rect(SCREEN, GREEN, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
 
-    drop_notes()
 
-    if pygame.key.get_pressed()[pygame.K_d]:
-        SCREEN.blit(pink_keybeam, (440, 0))
-    if pygame.key.get_pressed()[pygame.K_f]:
-        SCREEN.blit(pink_keybeam, (540, 0))
-    if pygame.key.get_pressed()[pygame.K_j]:
-        SCREEN.blit(pink_keybeam, (640, 0))
-    if pygame.key.get_pressed()[pygame.K_k]:
-        SCREEN.blit(pink_keybeam, (740, 0))
 
-    SCREEN.blit(mediumfont.render(rate, True, YELLOW), (560, 400))
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            is_running = False
+def game():
+    while is_running:
+        SCREEN.fill(BLACK)
+        pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
 
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                music_play()
-                music_start_time = pygame.time.get_ticks()
-                
-            if event.key == pygame.K_d:
-                if music_start_time > 0:
-                    try:
-                        timing(notequeue_1[0])
-                    except IndexError:
-                        continue
-            if event.key == pygame.K_f:
-                if music_start_time > 0:
-                    try:
-                        timing(notequeue_2[0])
-                    except IndexError:
-                        continue
-            if event.key == pygame.K_j:
-                if music_start_time > 0:
-                    try:
-                        timing(notequeue_3[0])
-                    except IndexError:
-                        continue
-            if event.key == pygame.K_k:
-                if music_start_time > 0:
-                    try:
-                        timing(notequeue_4[0])
-                    except IndexError:
-                        continue
+        drop_notes()
 
-    show_timing(rate)
-    
-    if music_start_time > 0 and music_playtime <= 8000:
-        music_playtime = pygame.time.get_ticks() - music_start_time
-        if notequeue_1:                   
-            miss_check(notequeue_1[0])
-        if notequeue_2:                   
-            miss_check(notequeue_2[0])
-        if notequeue_3:                   
-            miss_check(notequeue_3[0])
-        if notequeue_4:                   
-            miss_check(notequeue_4[0])
+        if pygame.key.get_pressed()[pygame.K_d]:
+            SCREEN.blit(pink_keybeam, (440, 0))
+        if pygame.key.get_pressed()[pygame.K_f]:
+            SCREEN.blit(pink_keybeam, (540, 0))
+        if pygame.key.get_pressed()[pygame.K_j]:
+            SCREEN.blit(pink_keybeam, (640, 0))
+        if pygame.key.get_pressed()[pygame.K_k]:
+            SCREEN.blit(pink_keybeam, (740, 0))
+
+        #SCREEN.blit(mediumfont.render(rate, True, YELLOW), (560, 400))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    music_play()
+                    music_start_time = pygame.time.get_ticks()
+                    
+                if event.key == pygame.K_d:
+                    if music_start_time > 0:
+                        try:
+                            timing(notequeue_1[0])
+                        except IndexError:
+                            continue
+                if event.key == pygame.K_f:
+                    if music_start_time > 0:
+                        try:
+                            timing(notequeue_2[0])
+                        except IndexError:
+                            continue
+                if event.key == pygame.K_j:
+                    if music_start_time > 0:
+                        try:
+                            timing(notequeue_3[0])
+                        except IndexError:
+                            continue
+                if event.key == pygame.K_k:
+                    if music_start_time > 0:
+                        try:
+                            timing(notequeue_4[0])
+                        except IndexError:
+                            continue
+
+        show_timing(rate)
         
-        
+        if music_start_time > 0 and music_playtime <= 8000:
+            music_playtime = pygame.time.get_ticks() - music_start_time
+            if notequeue_1:                   
+                miss_check(notequeue_1[0])
+            if notequeue_2:                   
+                miss_check(notequeue_2[0])
+            if notequeue_3:                   
+                miss_check(notequeue_3[0])
+            if notequeue_4:                   
+                miss_check(notequeue_4[0])
+            
+            
 
-    SCREEN.blit(bigfont.render(str(music_playtime/1000), True, WHITE), (20, 20))
-        
+        SCREEN.blit(bigfont.render(str(music_playtime/1000), True, WHITE), (20, 20))
+            
 
-    pygame.display.flip()
-    clock.tick(FPS)
+        pygame.display.flip()
+        clock.tick(FPS)
 
 
-pygame.quit()
+start_screen()
