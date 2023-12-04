@@ -27,6 +27,10 @@ playbutton = pygame.image.load('img/playbutton.png')
 forwardbutton = pygame.image.load('img/forwardbutton.png')
 backbutton = pygame.image.load('img/backbutton.png')
 
+### Perfect! / Great / Good / OK / Break
+keysounds_1 = [pygame.mixer.Sound('keysound/keysound_perfect_1.wav'), pygame.mixer.Sound('keysound/keysound_great_1.wav'), pygame.mixer.Sound('keysound/keysound_good_1.wav'),
+               pygame.mixer.Sound('keysound/keysound_ok_1.wav'), pygame.mixer.Sound('keysound/keysound_break_1.wav')]
+
 ### 곡 제목 / 아티스트 이름 / 장르명 / 앨범커버 (380x380) / 곡 파일
 song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png')], 
                   ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png')], 

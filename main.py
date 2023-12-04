@@ -25,8 +25,8 @@ from settings import *
 판정 애니메이션
 메인 화면 만들기 
 
->> 디자인은 나중에, 기능 구현을 먼저!! <<
-필요한 기능
+>> 타격음 편집하기 <<
+
 
 
 '''
@@ -143,27 +143,31 @@ def timing(note):
         rate = "Perfect!"
         remove_note(note)
         combo += 1
+        SoundFXChannel.play(keysounds_1[0])
     elif abs(diff_time) <= 70:
         print('Great')
         rate = "Great"
         remove_note(note)
         combo += 1
+        SoundFXChannel.play(keysounds_1[1])
     elif abs(diff_time) <= 100:
         print('Good')
         rate = "Good"
         remove_note(note)
         combo += 1
+        SoundFXChannel.play(keysounds_1[2])
     elif abs(diff_time) <= 300:
         print('OK')
         rate = "OK"
         remove_note(note)
         combo = 0
+        SoundFXChannel.play(keysounds_1[3])
     elif abs(diff_time) <= 800:
         print('Break')
         rate = "Break"
         remove_note(note)
         combo = 0
-       
+        SoundFXChannel.play(keysounds_1[4])
 
 def miss_check(note):
     global combo
