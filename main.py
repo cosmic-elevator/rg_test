@@ -38,9 +38,9 @@ from settings import *
 pygame.init()
 pygame.mixer.init()
 
-smallfont = pygame.font.Font("font/kotra_hope.ttf", 40)
-mediumfont = pygame.font.Font("font/kotra_hope.ttf", 50)
-bigfont = pygame.font.Font("font/kotra_hope.ttf", 80)
+smallfont = pygame.font.Font("font/kotra_hope.ttf", 30)
+mediumfont = pygame.font.Font("font/kotra_hope.ttf", 45)
+bigfont = pygame.font.Font("font/kotra_hope.ttf", 50)
 
 class Note(pygame.sprite.Sprite):
     def __init__(self, linenum, exact_hit_time):
@@ -63,6 +63,7 @@ pygame.display.set_caption('rhythm game test')
 
 is_running = True
 gamemode = 0
+songlist_cursor = 0
 
 judgeline = pygame.Rect(WIDTH/2-100, HEIGHT/2, 200, 10)
 pygame.mixer.music.load('test.wav')
@@ -193,7 +194,7 @@ def show_combo():
 while is_running:
     if gamemode == 0:       ## 시작 화면
         SCREEN.blit(startscreen_img, (0, 0))
-        SCREEN.blit(bigfont.render("튜토리얼을 진행하려면 T,\n바로 플레이하려면 Space를 눌러주세요.", True, WHITE), (0, 0))
+        SCREEN.blit(mediumfont.render("튜토리얼을 진행하려면 T,\n바로 플레이하려면 Space를 눌러주세요.", True, WHITE), (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_running = False
@@ -204,7 +205,18 @@ while is_running:
                     gamemode = 1
                 
     if gamemode == 1:       ## 곡 선택 화면
-        SCREEN.fill(BLACK)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+        SCREEN.fill(GREEN)
+        pygame.draw.rect(SCREEN, YELLOW, (0, 0, 1280, 70))
+        SCREEN.blit(mediumfont.render("SONG SELECT", True, BLACK), (50, 15))
+        pygame.draw.rect(SCREEN, WHITE, [130, 110, 380, 380])
+        SCREEN.blit(mediumfont.render(song_info_list[songlist_cursor][0], True, BLACK), (150, 350))
+        SCREEN.blit(smallfont.render(song_info_list[songlist_cursor][1], True, BLACK), (150, 400))
+        SCREEN.blit(smallfont.render(song_info_list[songlist_cursor][2], True, BLACK), (150, 440))
+        
+        
 
     if gamemode == 2:       ## 플레이 화면
         SCREEN.fill(BLACK)
@@ -274,6 +286,10 @@ while is_running:
 
         SCREEN.blit(bigfont.render(str(music_playtime/1000), True, WHITE), (20, 20))
                 
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            is_running = False
+
 
     pygame.display.flip()
     clock.tick(FPS)
