@@ -22,9 +22,14 @@ timing_ok_img = pygame.image.load('img/timing_ok_1.png')
 timing_miss_img = pygame.image.load('img/timing_miss_1.png')
 timing_break_img = pygame.image.load('img/timing_break_1.png')
 startscreen_img = pygame.image.load('img/alpaca.jpeg')
+cover_gradient_bg = pygame.image.load('img/cover_gradient_bg.png')
+playbutton = pygame.image.load('img/playbutton.png')
+forwardbutton = pygame.image.load('img/forwardbutton.png')
+backbutton = pygame.image.load('img/backbutton.png')
 
-### 곡 제목 / 아티스트 이름 / 장르명 / 앨범커버 (380x380)
+### 곡 제목 / 아티스트 이름 / 장르명 / 앨범커버 (380x380) / 곡 파일
 song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png')], 
-                  ["Our Rhythmetric", "YTS", "Glide Dance", pygame.transform.scale(pygame.image.load('img/our_rhythmetric_albumcover.png'), (380, 380))], 
-                  ["Dreamcandy", "PerAl", "Kawaii Chiptune"]]
-eyecatch_list = [pygame.image.load('img/alpaca.jpeg')]
+                  ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png')], 
+                  ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png')],
+                  ["HAPPY FESTA DAY!!", "Team Tomsquare", "Complextro", pygame.image.load('img/dreamcandy_albumcover.png')]]
+#eyecatch_list = [pygame.image.load('img/alpaca.jpeg')]
