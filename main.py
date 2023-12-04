@@ -14,9 +14,11 @@ import pygame
 - 마디마다 떨어지는 마디선
 - 그 외...
 
-지금 왜 어지러운지는 모르겠는데 아무튼 어지러워 죽을 것 같아요
-살려줘어어어어ㅓㅓㅓㅓㅓㅓㅓ
+프로토타입 개발 완료! 이제 이걸 잘 조합해서 겜 하나 만들면 됩니다....
 
+오늘 해야 할 것들
+무엇을 할 것인가 ~ 우리 게임의 시급한 문제 ~
+>> 판정 애니메이션 << 
 
 
 '''
@@ -59,6 +61,7 @@ mediumfont = pygame.font.Font(None, 50)
 bigfont = pygame.font.Font(None, 80)
 
 pink_keybeam = pygame.image.load('pink_keybeam.png')
+timing_perfect_img = pygame.image.load('timing_perfect_1.png')
 judgeline = pygame.Rect(WIDTH/2-100, HEIGHT/2, 200, 10)
 pygame.mixer.music.load('test.wav')
 MusicChannel = pygame.mixer.Channel(1)
@@ -70,12 +73,14 @@ global combo
 combo = 0
 global rate
 rate = ""
+global key_press_time
+key_press_time = 0
 
 notequeue_1 = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4), Note(1, 5), Note(1, 6), Note(1, 7), Note(1, 8)]
 notequeue_2 = [Note(2, 1), Note(2, 2)]
 notequeue_3 = [Note(3, 3), Note(3, 4)]
 notequeue_4 = [Note(4, 5), Note(4, 6)]
-
+266
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -118,6 +123,7 @@ def drop_notes():
 def timing(note):
     global rate
     global combo
+    global key_press_time
     key_press_time = pygame.time.get_ticks()
     diff_time = key_press_time - note.exact_hit_time*1000 - music_start_time
     print(diff_time)
@@ -158,6 +164,17 @@ def miss_check(note):
         rate = "Miss"
         remove_note(note)
         
+
+def show_timing(rate):
+    if pygame.time.get_ticks() - key_press_time < 250:      # 0.25초 동안 판정 보여주기 
+        if rate == "Perfect!":
+            SCREEN.blit(timing_perfect_img, (490, 400))
+
+
+def show_combo():
+    global combo
+
+
 
 is_running = True
 while is_running:
@@ -210,6 +227,8 @@ while is_running:
                         timing(notequeue_4[0])
                     except IndexError:
                         continue
+
+    show_timing(rate)
     
     if music_start_time > 0 and music_playtime <= 8000:
         music_playtime = pygame.time.get_ticks() - music_start_time
