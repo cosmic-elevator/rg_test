@@ -1,5 +1,6 @@
 import pygame
 from settings import *
+from note import *
 
 '''
 
@@ -43,21 +44,6 @@ mediumfont = pygame.font.Font("font/kotra_hope.ttf", 45)
 bigfont = pygame.font.Font("font/kotra_hope.ttf", 50)
 combofont = pygame.font.Font("font/dangam.ttf", 66)
 
-class Note(pygame.sprite.Sprite):
-    def __init__(self, linenum, exact_hit_time):
-        super(Note, self).__init__()
-        self.linenum = linenum
-        self.exact_hit_time = exact_hit_time
-        self.image = pygame.image.load('img/purple_note.png')
-        self.rect = self.image.get_rect()
-        self.rect.x = 440 + (linenum - 1) * 100
-        self.rect.y = 0
-
-    def drop(self):
-        self.rect.y += SPEED
-        SCREEN.blit(self.image, (self.rect.x, self.rect.y))
-        
-    
 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('rhythm game test')
@@ -119,16 +105,20 @@ def drop_notes():
     for note in notequeue_1:
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
             note.drop()
+            SCREEN.blit(note.image, (note.rect.x, note.rect.y))
     for note in notequeue_2:
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
             note.drop()
+            SCREEN.blit(note.image, (note.rect.x, note.rect.y))
     for note in notequeue_3:
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
             note.drop()
+            SCREEN.blit(note.image, (note.rect.x, note.rect.y))
     for note in notequeue_4:
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
             note.drop()
-
+            SCREEN.blit(note.image, (note.rect.x, note.rect.y))
+    
 
 def timing(note):
     global rate
@@ -138,25 +128,25 @@ def timing(note):
     diff_time = key_press_time - note.exact_hit_time * 1000 - music_start_time
     print(diff_time)
     
-    if abs(diff_time) <= 30:
+    if abs(diff_time) <= 25:
         print('Perfect!')
         rate = "Perfect!"
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[0])
-    elif abs(diff_time) <= 70:
+    elif abs(diff_time) <= 50:
         print('Great')
         rate = "Great"
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[1])
-    elif abs(diff_time) <= 100:
+    elif abs(diff_time) <= 70:
         print('Good')
         rate = "Good"
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[2])
-    elif abs(diff_time) <= 300:
+    elif abs(diff_time) <= 200:
         print('OK')
         rate = "OK"
         remove_note(note)
