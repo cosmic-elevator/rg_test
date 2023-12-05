@@ -1,14 +1,15 @@
 import re
 import math
+from note import *
 
 
 class NoteParse():
     def __init__(self, bmsfile_location):
         self.bmsfile = open(bmsfile_location, 'r', encoding='utf-8')
-        self.temp_note_list_1 = []
-        self.temp_note_list_2 = []
-        self.temp_note_list_3 = []
-        self.temp_note_list_4 = []
+        self.noteq_1 = []
+        self.noteq_2 = []
+        self.noteq_3 = []
+        self.noteq_4 = []
         self.read_bms()
 
 
@@ -61,3 +62,26 @@ class NoteParse():
             
         except:
             pass
+
+
+    def add_note(self, barnum, linenum, note_data_list):
+    # for문을 돌면서 해당 마디 해당 라인에 있는 노트를 전부 리스트에 저장한다.
+        for i in range(len(note_data_list)):
+            if note_data_list[i] != "00":
+                detail_beat = barnum + (i / len(note_data_list))
+                note_expect_hit_time = self.calculate_time(self.bpm, detail_beat)
+                #note_generate_time = self.clean_decimal(note_expect_hit_time - 0.9)
+                if linenum == 1:
+                    self.noteq_1.append(Note(1, note_expect_hit_time))
+                elif linenum == 2:
+                    self.noteq_2.append(Note(2, note_expect_hit_time))
+                elif linenum == 3:
+                    self.noteq_3.append(Note(3, note_expect_hit_time))
+                elif linenum == 4:
+                    self.noteq_4.append(Note(4, note_expect_hit_time))
+
+
+    def calculate_time(self, bpm, detail_beat):
+        time = math.ceil(detail_beat * ((1.0 / bpm) * 60 * 4) * 1000)
+        #time = self.clean_decimal(time)
+        return time
