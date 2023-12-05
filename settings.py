@@ -1,4 +1,4 @@
-import pygame
+import pygame, threading, queue
 pygame.init()
 
 WIDTH = 1280
@@ -12,6 +12,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
+
 
 
 pink_keybeam = pygame.image.load('img/pink_keybeam.png')
@@ -31,9 +32,10 @@ backbutton = pygame.image.load('img/backbutton.png')
 keysounds_1 = [pygame.mixer.Sound('keysound/keysound_perfect_1.wav'), pygame.mixer.Sound('keysound/keysound_great_1.wav'), pygame.mixer.Sound('keysound/keysound_good_1.wav'),
                pygame.mixer.Sound('keysound/keysound_ok_1.wav'), pygame.mixer.Sound('keysound/keysound_break_1.wav')]
 
-### 곡 제목 / 아티스트 이름 / 장르명 / 앨범커버 (380x380) / 곡 파일
+### 0: 곡 제목 / 1: 아티스트 이름 / 2: 장르명 / 3: 앨범커버 (380x380) / 4: 아이캐치 / 5: 곡 하이라이트 파일 / 6: 곡 전체 파일 / 7: 패턴 위치 문자열
 song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png')], 
                   ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png')], 
                   ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png')],
                   ["HAPPY FESTA DAY!!", "Team Tomsquare", "Complextro", pygame.image.load('img/dreamcandy_albumcover.png')]]
 #eyecatch_list = [pygame.image.load('img/alpaca.jpeg')]
+

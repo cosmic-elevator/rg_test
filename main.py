@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from note import *
+from patternparser import *
 
 '''
 
@@ -67,13 +68,14 @@ clock = pygame.time.Clock()
 music_start_time = 0
 music_playtime = 0
 is_tutorial = False
-global combo, max_combo, rate, key_press_time, miss_check_time, play_score
+global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern
 combo = 0
 max_combo = 0
 rate = ""
 key_press_time = 0
 miss_check_time = 0
 play_score = 0
+cur_pattern = None
 # Perfect! / Great / Good / OK / Break / Miss
 timing_count = [0, 0, 0, 0, 0, 0]
 
@@ -84,42 +86,60 @@ notequeue_3 = [Note(3, 3), Note(3, 4)]
 notequeue_4 = [Note(4, 5), Note(4, 6)]
 
 
-
-def music_play():
+## 커서에 해당하는 음악을 재생하는 함수
+def music_play(cursor):
     if not pygame.mixer.get_busy():
-        MusicChannel.play(pygame.mixer.Sound('song/test.wav'))
+        MusicChannel.play(song_info_list[cursor][6])
 
 
+## 커서에 해당하는 음악의 패턴을 불러오는 함수
+def pattern_load(cursor):
+    global cur_pattern
+    cur_pattern = Pattern(song_info_list[cursor][7])
+
+
+
+## 노트 큐에서 노트를 제거하는 함수
 def remove_note(note):
     if note.linenum == 1:
-        notequeue_1.remove(note)
+        #notequeue_1.remove(note)
+        cur_pattern.noteq_1.remove(note)
     elif note.linenum == 2:
-        notequeue_2.remove(note)
+        #notequeue_2.remove(note)
+        cur_pattern.noteq_2.remove(note)
     elif note.linenum == 3:
-        notequeue_3.remove(note)
+        #notequeue_3.remove(note)
+        cur_pattern.noteq_3.remove(note)
     elif note.linenum == 4:
-        notequeue_4.remove(note)
+        #notequeue_4.remove(note)
+        cur_pattern.noteq_4.remove(note)
 
 
+## 그냥 순수하게 노트 큐에 있는 노트를 떨어뜨리는 역할을 하는 함수.
 def drop_notes():
-    for note in notequeue_1:
+    #for note in notequeue_1:
+    for note in cur_pattern.noteq_1:
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
-    for note in notequeue_2:
+    #for note in notequeue_2:
+    for note in cur_pattern.noteq_2:
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
-    for note in notequeue_3:
+    #for note in notequeue_3:
+    for note in cur_pattern.noteq_3:
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
-    for note in notequeue_4:
+    #for note in notequeue_4:
+    for note in cur_pattern.noteq_4:
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
     
 
+## 키를 누른 시간과 노트 시간의 차이인 오차 시간을 측정한 뒤, 판정을 결정하는 함수
 def timing(note):
     global rate
     global combo
@@ -171,6 +191,7 @@ def miss_check(note):
         remove_note(note)
         
 
+## 판정 이미지를 출력하는 함수 
 def show_timing(rate):
     if pygame.time.get_ticks() - key_press_time < 250 or pygame.time.get_ticks() - miss_check_time < 250:      # 0.25초 동안 판정 보여주기 
         if rate == "Perfect!":
@@ -187,6 +208,7 @@ def show_timing(rate):
             SCREEN.blit(timing_miss_img, (490, 400))
 
 
+## 콤보 폰트를 출력하는 함수 
 def show_combo():
     global combo
     if pygame.time.get_ticks() - key_press_time < 250:
@@ -194,6 +216,7 @@ def show_combo():
         SCREEN.blit(combo_text, combo_text.get_rect(center=(WIDTH/2, 200)))
 
 
+## 사용자의 최대 콤보를 체크하는 함수 
 def check_max_combo():
     global combo
     global max_combo
@@ -210,7 +233,7 @@ while is_running:
                 is_running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
-                    gamemode = 2    # T를 누르면 튜토리얼 플레이 화면으로 전환
+                    gamemode = 3    # T를 누르면 튜토리얼 플레이 화면으로 전환
                     is_tutorial = True
                 elif event.key == pygame.K_SPACE:
                     gamemode = 1
@@ -265,14 +288,16 @@ while is_running:
                 SCREEN.blit(smallfont.render(song_info_list[i][0], True, WHITE), (660, 120*i+125))
                 SCREEN.blit(smallfont.render(song_info_list[i][1], True, WHITE), (660, 120*i+155))
         
-        
+    
+    if gamemode == 2:       ## 아이캐치
+        SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
 
-    if gamemode == 2:       ## 플레이 화면
+
+    if gamemode == 3:       ## 플레이 화면
         SCREEN.fill(BLACK)
         pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
-        # 나중에 bga와 아이캐치 추가 
+        # 나중에 bga / 아이캐치 / 기어 추가 
 
-        drop_notes()
 
         if pygame.key.get_pressed()[pygame.K_d]:
             SCREEN.blit(pink_keybeam, (440, 0))
@@ -287,6 +312,7 @@ while is_running:
             beforeplay_text = mediumfont.render("Space를 눌러 시작하세요!", True, WHITE)
             SCREEN.blit(beforeplay_text, beforeplay_text.get_rect(center=(WIDTH/2, HEIGHT/2)))
 
+        drop_notes()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -296,9 +322,11 @@ while is_running:
                 if event.key == pygame.K_ESCAPE:
                     gamemode = 1
 
-                if event.key == pygame.K_UP:
-                    music_play()
-                    music_start_time = pygame.time.get_ticks()
+                if event.key == pygame.K_SPACE:
+                    pattern_load(songlist_cursor)
+                    if cur_pattern:
+                        music_play()
+                        music_start_time = pygame.time.get_ticks()
                         
                 if event.key == pygame.K_d:
                     if music_start_time > 0:
