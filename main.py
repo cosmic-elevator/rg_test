@@ -270,6 +270,7 @@ while is_running:
     if gamemode == 2:       ## 플레이 화면
         SCREEN.fill(BLACK)
         pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
+        # 나중에 bga와 아이캐치 추가 
 
         drop_notes()
 
@@ -282,7 +283,10 @@ while is_running:
         if pygame.key.get_pressed()[pygame.K_k]:
             SCREEN.blit(pink_keybeam, (740, 0))
 
-            #SCREEN.blit(mediumfont.render(rate, True, YELLOW), (560, 400))
+        if not music_start_time:
+            beforeplay_text = mediumfont.render("Space를 눌러 시작하세요!", True, WHITE)
+            SCREEN.blit(beforeplay_text, beforeplay_text.get_rect(center=(WIDTH/2, HEIGHT/2)))
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
