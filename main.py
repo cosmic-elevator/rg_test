@@ -5,31 +5,11 @@ from patternparser import *
 
 '''
 
-
-테스트용 게임
-------------------
-필요한 것들 목록
-- 음악 플레이 버튼
-- 테스트용 음악 (주먹 쥐고)
-- 음악 러닝타임 표시 기능
-- 기본 노트 낙하 레인
-- 박자마다 떨어지는 노트
-- 마디마다 떨어지는 마디선
-- 그 외...
-
-프로토타입 개발 완료! 이제 이걸 잘 조합해서 겜 하나 만들면 됩니다....
-
-오늘 해야 할 것들
 무엇을 할 것인가 ~ 우리 게임의 시급한 문제 ~
 약간 팝픈뮤직 느낌?
 메뉴 음악 / 로비 음악
 아이캐치
 판정 애니메이션
-메인 화면 만들기 
-
->> 타격음 편집하기 <<
-
-
 
 '''
 
@@ -88,16 +68,17 @@ notequeue_4 = [Note(4, 5), Note(4, 6)]
 
 ## 커서에 해당하는 음악을 재생하는 함수
 def music_play(cursor):
-    if not pygame.mixer.get_busy():
-        MusicChannel.play(song_info_list[cursor][6])
+    MusicChannel.play(song_info_list[cursor][6])
 
 
 ## 커서에 해당하는 음악의 패턴을 불러오는 함수
 def pattern_load(cursor):
     global cur_pattern
     cur_pattern = Pattern(song_info_list[cursor][7])
-
-
+    cur_pattern.noteq_1 = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4), Note(1, 5), Note(1, 6), Note(1, 7), Note(1, 8)]
+    cur_pattern.noteq_2 = [Note(2, 1), Note(2, 2)]
+    cur_pattern.noteq_3 = [Note(3, 3), Note(3, 4)]
+    cur_pattern.noteq_4 = [Note(4, 5), Note(4, 6)]
 
 ## 노트 큐에서 노트를 제거하는 함수
 def remove_note(note):
@@ -312,7 +293,6 @@ while is_running:
             beforeplay_text = mediumfont.render("Space를 눌러 시작하세요!", True, WHITE)
             SCREEN.blit(beforeplay_text, beforeplay_text.get_rect(center=(WIDTH/2, HEIGHT/2)))
 
-        drop_notes()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -323,50 +303,53 @@ while is_running:
                     gamemode = 1
 
                 if event.key == pygame.K_SPACE:
-                    pattern_load(songlist_cursor)
-                    if cur_pattern:
-                        music_play()
-                        music_start_time = pygame.time.get_ticks()
-                        
+                    if not pygame.mixer.get_busy():
+                        if not cur_pattern:
+                            pattern_load(songlist_cursor)
+                            music_play(songlist_cursor)
+                            music_start_time = pygame.time.get_ticks()
+                            
                 if event.key == pygame.K_d:
                     if music_start_time > 0:
                         try:
-                            timing(notequeue_1[0])
+                            timing(cur_pattern.noteq_1[0])
                         except IndexError:
                             continue
                 if event.key == pygame.K_f:
                     if music_start_time > 0:
                         try:
-                            timing(notequeue_2[0])
+                            timing(cur_pattern.noteq_2[0])
                         except IndexError:
                             continue
                 if event.key == pygame.K_j:
                     if music_start_time > 0:
                         try:
-                            timing(notequeue_3[0])
+                            timing(cur_pattern.noteq_3[0])
                         except IndexError:
                             continue
                 if event.key == pygame.K_k:
                     if music_start_time > 0:
                         try:
-                            timing(notequeue_4[0])
+                            timing(cur_pattern.noteq_4[0])
                         except IndexError:
                             continue
 
-        show_timing(rate)
-        show_combo()
-        check_max_combo()
-            
+
         if music_start_time > 0 and music_playtime <= 8000:
+            drop_notes()
+            show_timing(rate)
+            show_combo()
+            check_max_combo()
+
             music_playtime = pygame.time.get_ticks() - music_start_time
-            if notequeue_1:                   
-                miss_check(notequeue_1[0])
-            if notequeue_2:                   
-                miss_check(notequeue_2[0])
-            if notequeue_3:                   
-                miss_check(notequeue_3[0])
-            if notequeue_4:                   
-                miss_check(notequeue_4[0])
+            if cur_pattern.noteq_1:                   
+                miss_check(cur_pattern.noteq_1[0])
+            if cur_pattern.noteq_2:                   
+                miss_check(cur_pattern.noteq_2[0])
+            if cur_pattern.noteq_3:                   
+                miss_check(cur_pattern.noteq_3[0])
+            if cur_pattern.noteq_4:                   
+                miss_check(cur_pattern.noteq_4[0])
                 
                 
 
