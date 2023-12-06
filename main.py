@@ -7,9 +7,10 @@ from patternparser import *
 
 무엇을 할 것인가 ~ 우리 게임의 시급한 문제 ~
 약간 팝픈뮤직 느낌?
-메뉴 음악 / 로비 음악
+메뉴 음악 / 로비 음악 / 버튼 입력 효과음이 필요하다 (사실 이게 게임의 맛을 살리는 요소라고 해도 과언이 아니다)
 아이캐치
 판정 애니메이션
+
 
 '''
 
@@ -75,10 +76,10 @@ def music_play(cursor):
 def pattern_load(cursor):
     global cur_pattern
     cur_pattern = Pattern(song_info_list[cursor][7])
-    cur_pattern.noteq_1 = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4), Note(1, 5), Note(1, 6), Note(1, 7), Note(1, 8)]
-    cur_pattern.noteq_2 = [Note(2, 1), Note(2, 2)]
-    cur_pattern.noteq_3 = [Note(3, 3), Note(3, 4)]
-    cur_pattern.noteq_4 = [Note(4, 5), Note(4, 6)]
+    #cur_pattern.noteq_1 = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4), Note(1, 5), Note(1, 6), Note(1, 7), Note(1, 8)]
+    #cur_pattern.noteq_2 = [Note(2, 1.5), Note(2, 2.5)]
+    #cur_pattern.noteq_3 = [Note(3, 3.5), Note(3, 4.5)]
+    #cur_pattern.noteq_4 = [Note(4, 5), Note(4, 6)]
 
 ## 노트 큐에서 노트를 제거하는 함수
 def remove_note(note):
@@ -100,22 +101,22 @@ def remove_note(note):
 def drop_notes():
     #for note in notequeue_1:
     for note in cur_pattern.noteq_1:
-        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
+        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
     #for note in notequeue_2:
     for note in cur_pattern.noteq_2:
-        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
+        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
     #for note in notequeue_3:
     for note in cur_pattern.noteq_3:
-        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
+        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
     #for note in notequeue_4:
     for note in cur_pattern.noteq_4:
-        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * SPEED)):
+        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
     
@@ -129,7 +130,7 @@ def timing(note):
     diff_time = key_press_time - note.exact_hit_time * 1000 - music_start_time
     print(diff_time)
     
-    if abs(diff_time) <= 25:
+    if abs(diff_time) <= 20:
         print('Perfect!')
         rate = "Perfect!"
         remove_note(note)
@@ -335,7 +336,7 @@ while is_running:
                             continue
 
 
-        if music_start_time > 0 and music_playtime <= 8000:
+        if music_start_time > 0 and music_playtime <= song_info_list[songlist_cursor][6].get_length() * 1000:
             drop_notes()
             show_timing(rate)
             show_combo()

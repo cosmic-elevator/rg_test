@@ -27,10 +27,12 @@ class Pattern():
         if linedata == None: 
             return
         try:
-            if linedata[0] == '#':
+            if linedata[0] == '*':
+                pass
+            elif linedata[0] == '#':
                 # sepcharlist = [' ', ':']
                 self.stringlist = re.split(' |:', linedata)
-
+                
                 if self.stringlist[0] == "#BPM":
                     #print("bpm", self.stringlist[1])
                     self.bpm = int(self.stringlist[1])
@@ -61,6 +63,8 @@ class Pattern():
                     #self.current_note_datas = self.stringlist[1]
                     current_note_data_list = [self.stringlist[1][i:i+2]
                                                     for i in range(0, len(self.stringlist[1]), 2)]
+                    current_note_data_list.remove('\n')
+                    print(current_note_data_list)
                     self.add_note(current_barnum, current_linenum, current_note_data_list)
             
         except:
@@ -73,6 +77,7 @@ class Pattern():
             if note_data_list[i] != "00":
                 detail_beat = barnum + (i / len(note_data_list))
                 note_expect_hit_time = self.calculate_time(self.bpm, detail_beat)
+                #print(note_expect_hit_time)
                 self.note_add_status += 1
 
                 if linenum == 1:
@@ -86,7 +91,7 @@ class Pattern():
 
 
     def calculate_time(self, bpm, detail_beat):
-        time = math.ceil(detail_beat * ((1.0 / bpm) * 60 * 4) * 1000)
+        time = detail_beat * ((1.0 / bpm) * 60 * 4)
         #time = self.clean_decimal(time)
         return time
     
@@ -94,3 +99,12 @@ class Pattern():
     def calculate_percent(self, current, total):
         return round((current / total) * 100)
     
+
+
+#test_pt = Pattern('pattern/jumuck.bms')
+
+#for note in test_pt.noteq_1:
+    #print(note.exact_hit_time)
+
+    #exact_hit_time이 제대로 계산되지 않는 문제가 있다
+    #노트 개수는 제대로 계산되고 있는가?

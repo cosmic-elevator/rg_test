@@ -4,7 +4,7 @@ pygame.init()
 WIDTH = 1280
 HEIGHT = 720
 FPS = 60
-SPEED = 10  # 1프레임당 내려오는 노트의 픽셀
+speed = 10  # 1프레임당 내려오는 노트의 픽셀
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -40,3 +40,4 @@ song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('
                 #["HAPPY FESTA DAY!!", "Team Tomsquare", "Complextro", pygame.image.load('img/dreamcandy_albumcover.png')]
 #eyecatch_list = [pygame.image.load('img/alpaca.jpeg')]
 
+print(song_info_list[0][6].get_length())
