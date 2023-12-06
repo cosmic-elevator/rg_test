@@ -1,5 +1,4 @@
 import pygame
-from settings import *
 from note import *
 from patternparser import *
 
@@ -21,20 +20,66 @@ from patternparser import *
 pygame.init()
 pygame.mixer.init()
 
+WIDTH = 1280
+HEIGHT = 720
+FPS = 60
+
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('rhythm game test')
+
+WHITE = (245, 245, 245)
+BLACK = (89, 89, 89)
+GRAY = (120, 120, 120)
+RED = (255, 0, 0)
+GREEN = (94, 228, 148)
+BLUE = (0, 0, 255)
+SKYBLUE = (113, 179, 250)
+YELLOW = (255, 214, 85)
+PINK = (242, 130, 173)
+LIGHT_PINK = (255, 198, 219)
+
+
+pink_keybeam = pygame.image.load('img/pink_keybeam.png')
+timing_perfect_img = pygame.image.load('img/timing_perfect_1.png')
+timing_great_img = pygame.image.load('img/timing_great_1.png')
+timing_good_img = pygame.image.load('img/timing_good_1.png')
+timing_ok_img = pygame.image.load('img/timing_ok_1.png')
+timing_miss_img = pygame.image.load('img/timing_miss_1.png')
+timing_break_img = pygame.image.load('img/timing_break_1.png')
+startscreen_img = pygame.image.load('img/rhythmetric_main.png')
+cover_gradient_bg = pygame.image.load('img/cover_gradient_bg.png')
+black_alpha_bg = pygame.image.load('img/black_alpha_bg.png')
+white_alpha_bg = pygame.image.load('img/white_alpha_bg.png')
+playbutton = pygame.image.load('img/playbutton.png')
+forwardbutton = pygame.image.load('img/forwardbutton.png')
+backbutton = pygame.image.load('img/backbutton.png')
+
+### Perfect! / Great / Good / OK / Break
+keysounds_1 = [pygame.mixer.Sound('keysound/keysound_perfect_1.wav'), pygame.mixer.Sound('keysound/keysound_great_1.wav'), pygame.mixer.Sound('keysound/keysound_good_1.wav'),
+               pygame.mixer.Sound('keysound/keysound_ok_1.wav'), pygame.mixer.Sound('keysound/keysound_break_1.wav')]
+
+### 0: 곡 제목 / 1: 아티스트 이름 / 2: 장르명 / 3: 앨범커버 (380x380) / 4: 아이캐치 / 5: 곡 하이라이트 파일 / 6: 곡 전체 파일 / 7: 패턴 위치 문자열
+song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png'), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/jumuck.bms"], 
+                  ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png'), pygame.image.load('img/our_rhythmetric_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/our_rhythmetric.wav'), pygame.mixer.Sound('song/our_rhythmetric.wav'), None], 
+                  ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png'), pygame.image.load('img/dreamcandy_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/dreamcandy.wav'), pygame.mixer.Sound('song/dreamcandy.wav'), None]
+                  ]
+                #["HAPPY FESTA DAY!!", "Team Tomsquare", "Complextro", pygame.image.load('img/dreamcandy_albumcover.png')]
+#eyecatch_list = [pygame.image.load('img/alpaca.jpeg')]
+
+#print(song_info_list[0][6].get_length())
+
 smallfont = pygame.font.Font("font/kotra_hope.ttf", 30)
 mediumfont = pygame.font.Font("font/kotra_hope.ttf", 45)
 bigfont = pygame.font.Font("font/kotra_hope.ttf", 50)
 combofont = pygame.font.Font("font/dangam.ttf", 66)
 
 
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption('rhythm game test')
-
 is_running = True
 gamemode = 0
 songlist_cursor = 0
 song_selected_time = 0
 pos = (0, 0)
+#speed = 10  # 1프레임당 내려오는 노트의 픽셀
 
 songlist_boxes = []
 for i in range(len(song_info_list)):
@@ -141,19 +186,19 @@ def timing(note):
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[0])
-    elif abs(diff_time) <= 50:
+    elif abs(diff_time) <= 60:
         print('Great')
         rate = "Great"
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[1])
-    elif abs(diff_time) <= 70:
+    elif abs(diff_time) <= 110:
         print('Good')
         rate = "Good"
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[2])
-    elif abs(diff_time) <= 200:
+    elif abs(diff_time) <= 210:
         print('OK')
         rate = "OK"
         remove_note(note)
@@ -254,11 +299,14 @@ while is_running:
                 if event.key == pygame.K_DOWN:
                     songlist_cursor = (songlist_cursor + 1) % len(song_info_list)
 
-        SCREEN.fill(BLACK)
+        #SCREEN.fill(BLACK)
         SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
+        SCREEN.blit(black_alpha_bg, (0, 0))
         pygame.draw.rect(SCREEN, YELLOW, (0, 0, 1280, 70))
         SCREEN.blit(mediumfont.render("SONG SELECT", True, BLACK), (50, 15))
         #pygame.draw.rect(SCREEN, RED, [130, 110, 380, 380])
+        #pygame.draw.rect(SCREEN, GRAY, (80, 70, 480, 720))
+        SCREEN.blit(white_alpha_bg, (80, 70))
         SCREEN.blit(song_info_list[songlist_cursor][3], (130, 110))
         SCREEN.blit(cover_gradient_bg, (130, 110))
         SCREEN.blit(mediumfont.render(song_info_list[songlist_cursor][0], True, WHITE), (150, 350))
@@ -288,8 +336,8 @@ while is_running:
             SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
 
     if gamemode == 3:       ## 플레이 화면
-        SCREEN.fill(BLACK)
         SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
+        SCREEN.blit(black_alpha_bg, (0, 0))
         pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
         # 나중에 bga / 아이캐치 / 기어 추가 
 

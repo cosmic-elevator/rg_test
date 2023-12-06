@@ -1,5 +1,6 @@
 import pygame
-from settings import *
+
+speed = 5
 
 class Note(pygame.sprite.Sprite):
     def __init__(self, linenum, exact_hit_time):
