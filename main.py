@@ -33,6 +33,7 @@ pygame.display.set_caption('rhythm game test')
 is_running = True
 gamemode = 0
 songlist_cursor = 0
+song_selected_time = 0
 pos = (0, 0)
 
 songlist_boxes = []
@@ -66,6 +67,10 @@ notequeue_2 = [Note(2, 1), Note(2, 2)]
 notequeue_3 = [Note(3, 3), Note(3, 4)]
 notequeue_4 = [Note(4, 5), Note(4, 6)]
 
+
+## 곡 프리뷰를 반복 재생하는 함수
+def preview_play(cursor):
+    MusicChannel.play(song_info_list[cursor][5])
 
 ## 커서에 해당하는 음악을 재생하는 함수
 def music_play(cursor):
@@ -209,7 +214,8 @@ def check_max_combo():
 while is_running:
     if gamemode == 0:       ## 시작 화면
         SCREEN.blit(startscreen_img, (0, 0))
-        SCREEN.blit(mediumfont.render("튜토리얼을 진행하려면 T,\n바로 플레이하려면 Space를 눌러주세요.", True, WHITE), (0, 0))
+        start_text = mediumfont.render("튜토리얼을 진행하려면 T,\n바로 플레이하려면 Space를 눌러주세요.", True, WHITE)
+        SCREEN.blit(start_text, start_text.get_rect(center=(WIDTH/2, 600)))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_running = False
@@ -217,6 +223,7 @@ while is_running:
                 if event.key == pygame.K_t:
                     gamemode = 3    # T를 누르면 튜토리얼 플레이 화면으로 전환
                     is_tutorial = True
+                    song_selected_time = pygame.time.get_ticks()
                 elif event.key == pygame.K_SPACE:
                     gamemode = 1
                 
@@ -247,7 +254,8 @@ while is_running:
                 if event.key == pygame.K_DOWN:
                     songlist_cursor = (songlist_cursor + 1) % len(song_info_list)
 
-        SCREEN.fill(GREEN)
+        SCREEN.fill(BLACK)
+        SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
         pygame.draw.rect(SCREEN, YELLOW, (0, 0, 1280, 70))
         SCREEN.blit(mediumfont.render("SONG SELECT", True, BLACK), (50, 15))
         #pygame.draw.rect(SCREEN, RED, [130, 110, 380, 380])
@@ -265,6 +273,8 @@ while is_running:
                 pygame.draw.rect(SCREEN, YELLOW, [640, (120*i+110), 560, 100])
                 SCREEN.blit(smallfont.render(song_info_list[i][0], True, BLACK), (660, 120*i+125))
                 SCREEN.blit(smallfont.render(song_info_list[i][1], True, BLACK), (660, 120*i+155))
+                if not MusicChannel.get_busy() or MusicChannel.get_sound() != song_info_list[songlist_cursor][5]:
+                    preview_play(songlist_cursor)
             else:
                 pygame.draw.rect(SCREEN, BLACK, [640, (120*i+110), 560, 100])
                 SCREEN.blit(smallfont.render(song_info_list[i][0], True, WHITE), (660, 120*i+125))
@@ -272,11 +282,14 @@ while is_running:
         
     
     if gamemode == 2:       ## 아이캐치
-        SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
-
+        if pygame.time.get_ticks() - song_selected_time >= 1500:
+            gamemode = 3    
+        else:
+            SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
 
     if gamemode == 3:       ## 플레이 화면
         SCREEN.fill(BLACK)
+        SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
         pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
         # 나중에 bga / 아이캐치 / 기어 추가 
 

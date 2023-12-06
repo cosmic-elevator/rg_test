@@ -6,13 +6,15 @@ HEIGHT = 720
 FPS = 60
 speed = 10  # 1프레임당 내려오는 노트의 픽셀
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+WHITE = (245, 245, 245)
+BLACK = (89, 89, 89)
+GRAY = (120, 120, 120)
 RED = (255, 0, 0)
-GREEN = (0, 255, 0)
+GREEN = (94, 228, 148)
 BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
-
+SKYBLUE = (113, 179, 250)
+YELLOW = (255, 214, 85)
+PINK = (242, 130, 173)
 
 
 pink_keybeam = pygame.image.load('img/pink_keybeam.png')
@@ -22,7 +24,7 @@ timing_good_img = pygame.image.load('img/timing_good_1.png')
 timing_ok_img = pygame.image.load('img/timing_ok_1.png')
 timing_miss_img = pygame.image.load('img/timing_miss_1.png')
 timing_break_img = pygame.image.load('img/timing_break_1.png')
-startscreen_img = pygame.image.load('img/alpaca.jpeg')
+startscreen_img = pygame.image.load('img/rhythmetric_main.png')
 cover_gradient_bg = pygame.image.load('img/cover_gradient_bg.png')
 playbutton = pygame.image.load('img/playbutton.png')
 forwardbutton = pygame.image.load('img/forwardbutton.png')
