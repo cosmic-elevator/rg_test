@@ -12,7 +12,7 @@ class Note(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def drop(self):
-        self.rect.y += SPEED
+        self.rect.y += speed
         
         
     
