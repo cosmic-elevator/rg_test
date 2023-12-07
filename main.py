@@ -180,7 +180,7 @@ def timing(note):
     diff_time = key_press_time - note.exact_hit_time * 1000 - music_start_time
     print(diff_time)
     
-    if abs(diff_time) <= 20:
+    if abs(diff_time) <= 30:
         print('Perfect!')
         rate = "Perfect!"
         remove_note(note)
