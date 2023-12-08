@@ -118,14 +118,15 @@ notequeue_4 = [Note(4, 5), Note(4, 6)]
 
 ## 곡 프리뷰를 반복 재생하는 함수
 def preview_play(cursor):
-    if not BgMusicChannel.get_busy() or BgMusicChannel.get_sound() != song_info_list[songlist_cursor][5]:
-        BgMusicChannel.play(song_info_list[cursor][5])
+    if gamemode == 1:
+        if (not BgMusicChannel.get_busy() or BgMusicChannel.get_sound() != song_info_list[songlist_cursor][5]):
+            BgMusicChannel.play(song_info_list[cursor][5])
 
 ## 커서에 해당하는 음악을 재생하는 함수
 def music_play(cursor):
     if not SoundFXChannel.get_busy():
         #if BgMusicChannel.get_busy(): 
-        BgMusicChannel.stop()
+        #BgMusicChannel.stop()
         PlayingMusicChannel.play(song_info_list[cursor][6])
 
 
@@ -301,6 +302,7 @@ while is_running:
                     songlist_cursor = (songlist_cursor + 1) % len(song_info_list)
 
                 if playbutton_rect.collidepoint(pos):
+                    BgMusicChannel.stop()
                     SoundFXChannel.play(song_select_fx)
                     gamemode = 2
 
@@ -315,6 +317,7 @@ while is_running:
                     songlist_cursor = (songlist_cursor + 1) % len(song_info_list)
 
                 if event.key == pygame.K_RETURN:
+                    BgMusicChannel.stop()
                     SoundFXChannel.play(song_select_fx)
                     gamemode = 2
 
@@ -335,12 +338,13 @@ while is_running:
         SCREEN.blit(backbutton, (130, 565))
         SCREEN.blit(forwardbutton, (435, 565))
 
+        preview_play(songlist_cursor)
+
         for i in range(len(song_info_list)):
             if songlist_cursor == i:
                 pygame.draw.rect(SCREEN, YELLOW, [640, (120*i+110), 560, 100])
                 SCREEN.blit(smallfont.render(song_info_list[i][0], True, BLACK), (660, 120*i+125))
                 SCREEN.blit(smallfont.render(song_info_list[i][1], True, BLACK), (660, 120*i+155))
-                preview_play(songlist_cursor)
 
             else:
                 pygame.draw.rect(SCREEN, BLACK, [640, (120*i+110), 560, 100])
