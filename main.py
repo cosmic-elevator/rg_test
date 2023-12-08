@@ -1,4 +1,4 @@
-import pygame
+import pygame, PIL
 from note import *
 from patternparser import *
 
