@@ -22,7 +22,7 @@ pygame.mixer.init()
 
 WIDTH = 1280
 HEIGHT = 720
-FPS = 60
+FPS = 40
 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('rhythm game test')
@@ -96,6 +96,7 @@ PlayingMusicChannel = pygame.mixer.Channel(3)
 
 clock = pygame.time.Clock()
 is_tutorial = False
+
 global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count
 
 
@@ -393,6 +394,7 @@ while is_running:
                 if event.key == pygame.K_SPACE: 
                     if not pygame.mixer.get_busy():
                         if not cur_pattern:
+                            
                             pattern_load(songlist_cursor)
                             music_play(songlist_cursor)
                             music_start_time = pygame.time.get_ticks()
