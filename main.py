@@ -1,7 +1,7 @@
 import pygame
 from note import *
 from patternparser import *
-from PIL import Image, ImageFilter, ImageEnhance
+#from PIL import Image, ImageFilter, ImageEnhance
 
 
 pygame.mixer.pre_init(44100, 16, 2, 4096)
@@ -28,20 +28,20 @@ PINK = (242, 130, 173)
 LIGHT_PINK = (255, 198, 219)
 
 
-pink_keybeam = pygame.image.load('img/pink_keybeam.png')
-timing_perfect_img = pygame.image.load('img/timing_perfect_1.png')
-timing_great_img = pygame.image.load('img/timing_great_1.png')
-timing_good_img = pygame.image.load('img/timing_good_1.png')
-timing_ok_img = pygame.image.load('img/timing_ok_1.png')
-timing_miss_img = pygame.image.load('img/timing_miss_1.png')
-timing_break_img = pygame.image.load('img/timing_break_1.png')
-startscreen_img = pygame.image.load('img/rhythmetric_main.png')
-cover_gradient_bg = pygame.image.load('img/cover_gradient_bg.png')
-black_alpha_bg = pygame.image.load('img/black_alpha_bg.png')
-white_alpha_bg = pygame.image.load('img/white_alpha_bg.png')
-playbutton = pygame.image.load('img/playbutton.png')
-forwardbutton = pygame.image.load('img/forwardbutton.png')
-backbutton = pygame.image.load('img/backbutton.png')
+pink_keybeam = pygame.image.load('img/pink_keybeam.png').convert_alpha()
+timing_perfect_img = pygame.image.load('img/timing_perfect_1.png').convert_alpha()
+timing_great_img = pygame.image.load('img/timing_great_1.png').convert_alpha()
+timing_good_img = pygame.image.load('img/timing_good_1.png').convert_alpha()
+timing_ok_img = pygame.image.load('img/timing_ok_1.png').convert_alpha()
+timing_miss_img = pygame.image.load('img/timing_miss_1.png').convert_alpha()
+timing_break_img = pygame.image.load('img/timing_break_1.png').convert_alpha()
+startscreen_img = pygame.image.load('img/rhythmetric_main.png').convert()
+cover_gradient_bg = pygame.image.load('img/cover_gradient_bg.png').convert_alpha()
+black_alpha_bg = pygame.image.load('img/black_alpha_bg.png').convert_alpha()
+white_alpha_bg = pygame.image.load('img/white_alpha_bg.png').convert_alpha()
+playbutton = pygame.image.load('img/playbutton.png').convert_alpha()
+forwardbutton = pygame.image.load('img/forwardbutton.png').convert_alpha()
+backbutton = pygame.image.load('img/backbutton.png').convert_alpha()
 song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')    # 효과음이 구림 ...
 
 ### Perfect! / Great / Good / OK / Break
@@ -49,9 +49,9 @@ keysounds_1 = [pygame.mixer.Sound('fx/keysound_perfect_1.wav'), pygame.mixer.Sou
                pygame.mixer.Sound('fx/keysound_ok_1.wav'), pygame.mixer.Sound('fx/keysound_break_1.wav')]
 
 ### 0: 곡 제목 / 1: 아티스트 이름 / 2: 장르명 / 3: 앨범커버 (380x380) / 4: 아이캐치 / 5: 곡 하이라이트 파일 / 6: 곡 전체 파일 / 7: 패턴 위치 문자열
-song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png'), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/jumuck.bms"], 
-                  ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png'), pygame.image.load('img/our_rhythmetric_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/our_rhythmetric.wav'), pygame.mixer.Sound('song/our_rhythmetric.wav'), None], 
-                  ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png'), pygame.image.load('img/dreamcandy_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/dreamcandy.wav'), pygame.mixer.Sound('song/dreamcandy.wav'), None]
+song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png').convert(), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/jumuck.bms"], 
+                  ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png').convert(), pygame.image.load('img/our_rhythmetric_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/our_rhythmetric.wav'), pygame.mixer.Sound('song/our_rhythmetric.wav'), None], 
+                  ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png').convert(), pygame.image.load('img/dreamcandy_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/dreamcandy.wav'), pygame.mixer.Sound('song/dreamcandy.wav'), None]
                   ]
                 #["HAPPY FESTA DAY!!", "Team Tomsquare", "Complextro", pygame.image.load('img/dreamcandy_albumcover.png')]
 #eyecatch_list = [pygame.image.load('img/alpaca.jpeg')]
