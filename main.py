@@ -125,7 +125,7 @@ def preview_play(cursor):
 def music_play(cursor):
     if not SoundFXChannel.get_busy():
         #if BgMusicChannel.get_busy(): 
-        BgMusicChannel.set_volume(0)
+        BgMusicChannel.stop()
         PlayingMusicChannel.play(song_info_list[cursor][6])
 
 
