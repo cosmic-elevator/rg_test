@@ -53,10 +53,11 @@ white_alpha_bg = pygame.image.load('img/white_alpha_bg.png')
 playbutton = pygame.image.load('img/playbutton.png')
 forwardbutton = pygame.image.load('img/forwardbutton.png')
 backbutton = pygame.image.load('img/backbutton.png')
+song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')
 
 ### Perfect! / Great / Good / OK / Break
-keysounds_1 = [pygame.mixer.Sound('keysound/keysound_perfect_1.wav'), pygame.mixer.Sound('keysound/keysound_great_1.wav'), pygame.mixer.Sound('keysound/keysound_good_1.wav'),
-               pygame.mixer.Sound('keysound/keysound_ok_1.wav'), pygame.mixer.Sound('keysound/keysound_break_1.wav')]
+keysounds_1 = [pygame.mixer.Sound('fx/keysound_perfect_1.wav'), pygame.mixer.Sound('fx/keysound_great_1.wav'), pygame.mixer.Sound('fx/keysound_good_1.wav'),
+               pygame.mixer.Sound('fx/keysound_ok_1.wav'), pygame.mixer.Sound('fx/keysound_break_1.wav')]
 
 ### 0: 곡 제목 / 1: 아티스트 이름 / 2: 장르명 / 3: 앨범커버 (380x380) / 4: 아이캐치 / 5: 곡 하이라이트 파일 / 6: 곡 전체 파일 / 7: 패턴 위치 문자열
 song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png'), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/jumuck.bms"], 
@@ -86,10 +87,12 @@ for i in range(len(song_info_list)):
     songlist_boxes.append(pygame.Rect(640, (120*i+110), 560, 100))
 backbutton_rect = pygame.Rect(130, 565, 75, 50)
 forwardbutton_rect = pygame.Rect(435, 565, 75, 50)
+playbutton_rect = pygame.Rect(260, 530, 120, 120)
 
-judgeline = pygame.Rect(WIDTH/2-100, HEIGHT/2, 200, 10)
-MusicChannel = pygame.mixer.Channel(1)
+#judgeline = pygame.Rect(WIDTH/2-200, HEIGHT/2+140, 400, 10) # 540, 500, 200, 10 / 전ㅔ는 WIDTH/2-100, HEIGHT/2, 200, 10
+BgMusicChannel = pygame.mixer.Channel(1)
 SoundFXChannel = pygame.mixer.Channel(2)
+PlayingMusicChannel = pygame.mixer.Channel(3)
 
 clock = pygame.time.Clock()
 music_start_time = 0
@@ -115,11 +118,15 @@ notequeue_4 = [Note(4, 5), Note(4, 6)]
 
 ## 곡 프리뷰를 반복 재생하는 함수
 def preview_play(cursor):
-    MusicChannel.play(song_info_list[cursor][5])
+    if not BgMusicChannel.get_busy() or BgMusicChannel.get_sound() != song_info_list[songlist_cursor][5]:
+        BgMusicChannel.play(song_info_list[cursor][5])
 
 ## 커서에 해당하는 음악을 재생하는 함수
 def music_play(cursor):
-    MusicChannel.play(song_info_list[cursor][6])
+    if not SoundFXChannel.get_busy():
+        #if BgMusicChannel.get_busy(): 
+        BgMusicChannel.set_volume(0)
+        PlayingMusicChannel.play(song_info_list[cursor][6])
 
 
 ## 커서에 해당하는 음악의 패턴을 불러오는 함수
@@ -151,6 +158,8 @@ def remove_note(note):
 def drop_notes():
     #for note in notequeue_1:
     for note in cur_pattern.noteq_1:
+        # 이거 계산식 어떻게 나온 거지???????????????
+        # FPS * speed = pixel/second, judgeline_pixel * second/pixel = 노트가 내려오는 시간
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
@@ -180,6 +189,7 @@ def timing(note):
     diff_time = key_press_time - note.exact_hit_time * 1000 - music_start_time
     print(diff_time)
     
+    # 판정은 넉넉하게, 세부 판정(점수)를 짜게 (판정은 잘 나오니까 기분은 좋고 / 점수는 변별이 되고)
     if abs(diff_time) <= 30:
         print('Perfect!')
         rate = "Perfect!"
@@ -259,14 +269,14 @@ def check_max_combo():
 while is_running:
     if gamemode == 0:       ## 시작 화면
         SCREEN.blit(startscreen_img, (0, 0))
-        start_text = mediumfont.render("튜토리얼을 진행하려면 T,\n바로 플레이하려면 Space를 눌러주세요.", True, WHITE)
+        start_text = mediumfont.render("튜토리얼을 진행하려면 T,\n바로 플레이하려면 Space를 눌러주세요.", True, BLACK)
         SCREEN.blit(start_text, start_text.get_rect(center=(WIDTH/2, 600)))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
-                    gamemode = 3    # T를 누르면 튜토리얼 플레이 화면으로 전환
+                    gamemode = 2    # T를 누르면 튜토리얼 플레이 화면으로 전환
                     is_tutorial = True
                     song_selected_time = pygame.time.get_ticks()
                 elif event.key == pygame.K_SPACE:
@@ -279,6 +289,7 @@ while is_running:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
+                # 곡 목록에서 선택했을 때
                 for i in range(len(songlist_boxes)):
                     if songlist_boxes[i].collidepoint(pos):
                         songlist_cursor = i
@@ -289,6 +300,10 @@ while is_running:
                 if forwardbutton_rect.collidepoint(pos):
                     songlist_cursor = (songlist_cursor + 1) % len(song_info_list)
 
+                if playbutton_rect.collidepoint(pos):
+                    SoundFXChannel.play(song_select_fx)
+                    gamemode = 2
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     gamemode = 0
@@ -298,6 +313,10 @@ while is_running:
 
                 if event.key == pygame.K_DOWN:
                     songlist_cursor = (songlist_cursor + 1) % len(song_info_list)
+
+                if event.key == pygame.K_RETURN:
+                    SoundFXChannel.play(song_select_fx)
+                    gamemode = 2
 
         #SCREEN.fill(BLACK)
         SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
@@ -321,21 +340,16 @@ while is_running:
                 pygame.draw.rect(SCREEN, YELLOW, [640, (120*i+110), 560, 100])
                 SCREEN.blit(smallfont.render(song_info_list[i][0], True, BLACK), (660, 120*i+125))
                 SCREEN.blit(smallfont.render(song_info_list[i][1], True, BLACK), (660, 120*i+155))
-                if not MusicChannel.get_busy() or MusicChannel.get_sound() != song_info_list[songlist_cursor][5]:
-                    preview_play(songlist_cursor)
+                preview_play(songlist_cursor)
+
             else:
                 pygame.draw.rect(SCREEN, BLACK, [640, (120*i+110), 560, 100])
                 SCREEN.blit(smallfont.render(song_info_list[i][0], True, WHITE), (660, 120*i+125))
                 SCREEN.blit(smallfont.render(song_info_list[i][1], True, WHITE), (660, 120*i+155))
         
     
-    if gamemode == 2:       ## 아이캐치
-        if pygame.time.get_ticks() - song_selected_time >= 1500:
-            gamemode = 3    
-        else:
-            SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
 
-    if gamemode == 3:       ## 플레이 화면
+    if gamemode == 2:       ## 플레이 화면
         SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
         SCREEN.blit(black_alpha_bg, (0, 0))
         pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
@@ -362,6 +376,8 @@ while is_running:
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    PlayingMusicChannel.stop()
+                    # 게임 오버 창?
                     gamemode = 1
 
                 if event.key == pygame.K_SPACE:
