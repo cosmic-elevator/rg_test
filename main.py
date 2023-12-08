@@ -29,12 +29,7 @@ LIGHT_PINK = (255, 198, 219)
 
 
 pink_keybeam = pygame.image.load('img/pink_keybeam.png').convert_alpha()
-timing_perfect_img = pygame.image.load('img/timing_perfect_1.png').convert_alpha()
-timing_great_img = pygame.image.load('img/timing_great_1.png').convert_alpha()
-timing_good_img = pygame.image.load('img/timing_good_1.png').convert_alpha()
-timing_ok_img = pygame.image.load('img/timing_ok_1.png').convert_alpha()
-timing_miss_img = pygame.image.load('img/timing_miss_1.png').convert_alpha()
-timing_break_img = pygame.image.load('img/timing_break_1.png').convert_alpha()
+
 startscreen_img = pygame.image.load('img/rhythmetric_main.png').convert()
 cover_gradient_bg = pygame.image.load('img/cover_gradient_bg.png').convert_alpha()
 black_alpha_bg = pygame.image.load('img/black_alpha_bg.png').convert_alpha()
@@ -43,6 +38,9 @@ playbutton = pygame.image.load('img/playbutton.png').convert_alpha()
 forwardbutton = pygame.image.load('img/forwardbutton.png').convert_alpha()
 backbutton = pygame.image.load('img/backbutton.png').convert_alpha()
 song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')    # 효과음이 구림 ...
+
+timing_img_list = [pygame.image.load('img/timing_perfect_1.png').convert_alpha(), pygame.image.load('img/timing_great_1.png').convert_alpha(), pygame.image.load('img/timing_good_1.png').convert_alpha(),
+                   pygame.image.load('img/timing_ok_1.png').convert_alpha(), pygame.image.load('img/timing_break_1.png').convert_alpha(), pygame.image.load('img/timing_miss_1.png').convert_alpha()]
 
 ### Perfect! / Great / Good / OK / Break
 keysounds_1 = [pygame.mixer.Sound('fx/keysound_perfect_1.wav'), pygame.mixer.Sound('fx/keysound_great_1.wav'), pygame.mixer.Sound('fx/keysound_good_1.wav'),
@@ -94,7 +92,7 @@ def play_init():
     global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, music_start_time, music_playtime
     combo = 0
     max_combo = 0
-    rate = ""
+    rate = -1
     key_press_time = 0
     miss_check_time = 0
     play_score = 0
@@ -179,35 +177,35 @@ def timing(note):
     # 판정은 넉넉하게, 세부 판정(점수)를 짜게 (판정은 잘 나오니까 기분은 좋고 / 점수는 변별이 되고)
     if abs(diff_time) <= 40:
         print('Perfect!')
-        rate = "Perfect!"
+        rate = 0
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[0])
         timing_count[0] += 1
     elif abs(diff_time) <= 60:
         print('Great')
-        rate = "Great"
+        rate = 1
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[1])
         timing_count[1] += 1
     elif abs(diff_time) <= 110:
         print('Good')
-        rate = "Good"
+        rate = 2
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[2])
         timing_count[2] += 1
     elif abs(diff_time) <= 210:
         print('OK')
-        rate = "OK"
+        rate = 3
         remove_note(note)
         combo = 0
         SoundFXChannel.play(keysounds_1[3])
         timing_count[3] += 1
     elif abs(diff_time) <= 500:
         print('Break')
-        rate = "Break"
+        rate = 4
         remove_note(note)
         combo = 0
         SoundFXChannel.play(keysounds_1[4])
@@ -220,7 +218,7 @@ def miss_check(note):
     if note.rect.y >= 570:
         print('Miss')
         combo = 0
-        rate = "Miss"
+        rate = 5
         miss_check_time = pygame.time.get_ticks()
         timing_count[5] += 1
         remove_note(note)
@@ -229,19 +227,21 @@ def miss_check(note):
 ## 판정 이미지를 출력하는 함수 
 def show_timing(rate):
     if pygame.time.get_ticks() - key_press_time < 250 or pygame.time.get_ticks() - miss_check_time < 250:      # 0.25초 동안 판정 보여주기 
+        SCREEN.blit(timing_img_list[rate], (490, 400))
+        '''
         if rate == "Perfect!":
-            SCREEN.blit(timing_perfect_img, (490, 400))
+            SCREEN.blit(timing_img_list[0], (490, 400))
         elif rate == "Great":
-            SCREEN.blit(timing_great_img, (490, 400))
+            SCREEN.blit(timing_img_list[1], (490, 400))
         elif rate == "Good":
-            SCREEN.blit(timing_good_img, (490, 400))
+            SCREEN.blit(timing_img_list[2], (490, 400))
         elif rate == "OK":
-            SCREEN.blit(timing_ok_img, (490, 400))
+            SCREEN.blit(timing_img_list[3]g, (490, 400))
         elif rate == "Break":
-            SCREEN.blit(timing_break_img, (490, 400))
+            SCREEN.blit(timing_img_list[4], (490, 400))
         elif rate == "Miss":
-            SCREEN.blit(timing_miss_img, (490, 400))
-
+            SCREEN.blit(timing_img_list[5], (490, 400))
+        '''
 
 ## 콤보 폰트를 출력하는 함수 
 def show_combo():
@@ -469,7 +469,7 @@ while is_running:
         pygame.draw.rect(SCREEN, YELLOW, (160, 660, 960, 30))
         
         for i in range(len(timing_count)):
-            SCREEN.blit(pygame.transform.scale(timing_perfect_img, (200, 40)), (690, 65*i+170))
+            SCREEN.blit(pygame.transform.scale(timing_img_list[i], (200, 40)), (690, 65*i+170))
             pygame.draw.rect(SCREEN, WHITE, (920, 65*i+170, 100, 40))
 
 
