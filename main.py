@@ -1,31 +1,20 @@
-import pygame, PIL
+import pygame
 from note import *
 from patternparser import *
-
-'''
-
-무엇을 할 것인가 ~ 우리 게임의 시급한 문제 ~
-약간 팝픈뮤직 느낌?
-메뉴 음악 / 로비 음악 / 버튼 입력 효과음이 필요하다 (사실 이게 게임의 맛을 살리는 요소라고 해도 과언이 아니다)
-아이캐치
-판정 애니메이션
+from PIL import Image, ImageFilter, ImageEnhance
 
 
-'''
-
-
-
-
-
+pygame.mixer.pre_init(44100, 16, 2, 4096)
 pygame.init()
 pygame.mixer.init()
 
 WIDTH = 1280
 HEIGHT = 720
-FPS = 40
+FPS = 60
 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('rhythm game test')
+pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONDOWN])
 
 WHITE = (245, 245, 245)
 BLACK = (89, 89, 89)
@@ -484,8 +473,10 @@ while is_running:
             pygame.draw.rect(SCREEN, WHITE, (920, 65*i+170, 100, 40))
 
 
-
-    pygame.display.update()
+    # Secondly, try updating only the certain sprite(s) 
+    # by passing the sprite(s) rect(s) into the update() function. 
+    # This updates only those specific sprite(s), saving a lot of performance.
+    pygame.display.update() 
     clock.tick(FPS)
 
 
