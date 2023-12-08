@@ -63,7 +63,7 @@ class Pattern():
                     current_note_data_list = [self.stringlist[1][i:i+2]
                                                     for i in range(0, len(self.stringlist[1]), 2)]
                     current_note_data_list.remove('\n')
-                    print(current_note_data_list)
+                    #print(current_note_data_list)
                     self.add_note(current_barnum, current_linenum, current_note_data_list)
             
         except:
