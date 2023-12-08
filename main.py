@@ -53,7 +53,7 @@ white_alpha_bg = pygame.image.load('img/white_alpha_bg.png')
 playbutton = pygame.image.load('img/playbutton.png')
 forwardbutton = pygame.image.load('img/forwardbutton.png')
 backbutton = pygame.image.load('img/backbutton.png')
-song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')
+song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')    # 효과음이 구림 ...
 
 ### Perfect! / Great / Good / OK / Break
 keysounds_1 = [pygame.mixer.Sound('fx/keysound_perfect_1.wav'), pygame.mixer.Sound('fx/keysound_great_1.wav'), pygame.mixer.Sound('fx/keysound_good_1.wav'),
@@ -95,25 +95,24 @@ SoundFXChannel = pygame.mixer.Channel(2)
 PlayingMusicChannel = pygame.mixer.Channel(3)
 
 clock = pygame.time.Clock()
-music_start_time = 0
-music_playtime = 0
 is_tutorial = False
-global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern
-combo = 0
-max_combo = 0
-rate = ""
-key_press_time = 0
-miss_check_time = 0
-play_score = 0
-cur_pattern = None
-# Perfect! / Great / Good / OK / Break / Miss
-timing_count = [0, 0, 0, 0, 0, 0]
+global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count
 
 
-notequeue_1 = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4), Note(1, 5), Note(1, 6), Note(1, 7), Note(1, 8)]
-notequeue_2 = [Note(2, 1), Note(2, 2)]
-notequeue_3 = [Note(3, 3), Note(3, 4)]
-notequeue_4 = [Note(4, 5), Note(4, 6)]
+## 게임 플레이 변수를 초기화하는 함수
+def play_init():
+    global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, music_start_time, music_playtime
+    combo = 0
+    max_combo = 0
+    rate = ""
+    key_press_time = 0
+    miss_check_time = 0
+    play_score = 0
+    music_start_time = 0
+    music_playtime = 0
+    cur_pattern = None
+    # Perfect! / Great / Good / OK / Break / Miss
+    timing_count = [0, 0, 0, 0, 0, 0]
 
 
 ## 곡 프리뷰를 반복 재생하는 함수
@@ -124,10 +123,7 @@ def preview_play(cursor):
 
 ## 커서에 해당하는 음악을 재생하는 함수
 def music_play(cursor):
-    if not SoundFXChannel.get_busy():
-        #if BgMusicChannel.get_busy(): 
-        #BgMusicChannel.stop()
-        PlayingMusicChannel.play(song_info_list[cursor][6])
+    PlayingMusicChannel.play(song_info_list[cursor][6])
 
 
 ## 커서에 해당하는 음악의 패턴을 불러오는 함수
@@ -191,36 +187,41 @@ def timing(note):
     print(diff_time)
     
     # 판정은 넉넉하게, 세부 판정(점수)를 짜게 (판정은 잘 나오니까 기분은 좋고 / 점수는 변별이 되고)
-    if abs(diff_time) <= 30:
+    if abs(diff_time) <= 40:
         print('Perfect!')
         rate = "Perfect!"
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[0])
+        timing_count[0] += 1
     elif abs(diff_time) <= 60:
         print('Great')
         rate = "Great"
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[1])
+        timing_count[1] += 1
     elif abs(diff_time) <= 110:
         print('Good')
         rate = "Good"
         remove_note(note)
         combo += 1
         SoundFXChannel.play(keysounds_1[2])
+        timing_count[2] += 1
     elif abs(diff_time) <= 210:
         print('OK')
         rate = "OK"
         remove_note(note)
         combo = 0
         SoundFXChannel.play(keysounds_1[3])
-    elif abs(diff_time) <= 800:
+        timing_count[3] += 1
+    elif abs(diff_time) <= 500:
         print('Break')
         rate = "Break"
         remove_note(note)
         combo = 0
         SoundFXChannel.play(keysounds_1[4])
+        timing_count[4] += 1
 
 def miss_check(note):
     global combo
@@ -231,6 +232,7 @@ def miss_check(note):
         combo = 0
         rate = "Miss"
         miss_check_time = pygame.time.get_ticks()
+        timing_count[5] += 1
         remove_note(note)
         
 
@@ -277,9 +279,10 @@ while is_running:
                 is_running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
-                    gamemode = 2    # T를 누르면 튜토리얼 플레이 화면으로 전환
+                    play_init()
                     is_tutorial = True
                     song_selected_time = pygame.time.get_ticks()
+                    gamemode = 2    # T를 누르면 튜토리얼 플레이 화면으로 전환
                 elif event.key == pygame.K_SPACE:
                     gamemode = 1
                 
@@ -304,6 +307,7 @@ while is_running:
                 if playbutton_rect.collidepoint(pos):
                     BgMusicChannel.stop()
                     SoundFXChannel.play(song_select_fx)
+                    play_init()
                     gamemode = 2
 
             if event.type == pygame.KEYDOWN:
@@ -319,6 +323,7 @@ while is_running:
                 if event.key == pygame.K_RETURN:
                     BgMusicChannel.stop()
                     SoundFXChannel.play(song_select_fx)
+                    play_init()
                     gamemode = 2
 
         #SCREEN.fill(BLACK)
@@ -384,7 +389,7 @@ while is_running:
                     # 게임 오버 창?
                     gamemode = 1
 
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE: 
                     if not pygame.mixer.get_busy():
                         if not cur_pattern:
                             pattern_load(songlist_cursor)
@@ -417,29 +422,56 @@ while is_running:
                             continue
 
 
-        if music_start_time > 0 and music_playtime <= song_info_list[songlist_cursor][6].get_length() * 1000:
-            drop_notes()
-            show_timing(rate)
-            show_combo()
-            check_max_combo()
+        if music_start_time > 0:    # and music_playtime <= song_info_list[songlist_cursor][6].get_length() * 1000
+            if cur_pattern:
+                drop_notes()
+                show_timing(rate)
+                show_combo()
+                check_max_combo()
 
-            music_playtime = pygame.time.get_ticks() - music_start_time
-            if cur_pattern.noteq_1:                   
-                miss_check(cur_pattern.noteq_1[0])
-            if cur_pattern.noteq_2:                   
-                miss_check(cur_pattern.noteq_2[0])
-            if cur_pattern.noteq_3:                   
-                miss_check(cur_pattern.noteq_3[0])
-            if cur_pattern.noteq_4:                   
-                miss_check(cur_pattern.noteq_4[0])
-                
-                
+                music_playtime = pygame.time.get_ticks() - music_start_time
+                if cur_pattern.noteq_1:                   
+                    miss_check(cur_pattern.noteq_1[0])
+                if cur_pattern.noteq_2:                   
+                    miss_check(cur_pattern.noteq_2[0])
+                if cur_pattern.noteq_3:                   
+                    miss_check(cur_pattern.noteq_3[0])
+                if cur_pattern.noteq_4:                   
+                    miss_check(cur_pattern.noteq_4[0])
+            
+            if music_playtime > song_info_list[songlist_cursor][6].get_length() * 1000 + 500 and music_playtime <= song_info_list[songlist_cursor][6].get_length() * 1000 + 2400:
+                # 나중에 이미지 애니메이션으로 변경
+                if timing_count[0] == 26:
+                    SCREEN.blit(combofont.render("All Perfect", True, WHITE), (0, 0))
+                elif max_combo == 26:
+                    SCREEN.blit(combofont.render("Full combo", True, WHITE), (0, 0))
 
-        SCREEN.blit(bigfont.render(str(music_playtime/1000), True, WHITE), (20, 20))
+            if music_playtime > song_info_list[songlist_cursor][6].get_length() * 1000 + 5000:
+                gamemode = 3
+
+        #SCREEN.blit(bigfont.render(str(music_playtime/1000), True, WHITE), (20, 20))
         SCREEN.blit(bigfont.render("SCORE: " + str(play_score), True, WHITE), (50, 580))
         SCREEN.blit(bigfont.render("MAX COMBO: " + str(max_combo), True, WHITE), (50, 630))
 
-    pygame.display.flip()
+
+    if gamemode == 3:    # 리절트 창
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    BgMusicChannel.stop()
+                    # 게임 오버 창?
+                    gamemode = 1
+
+        SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
+        SCREEN.blit(black_alpha_bg, (0, 0))
+
+
+
+
+    pygame.display.update()
     clock.tick(FPS)
 
 
