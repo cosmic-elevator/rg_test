@@ -39,6 +39,8 @@ forwardbutton = pygame.image.load('img/forwardbutton.png').convert_alpha()
 backbutton = pygame.image.load('img/backbutton.png').convert_alpha()
 song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')    # 효과음이 구림 ...
 
+grade_img_list = []
+
 timing_img_list = [pygame.image.load('img/timing_perfect_1.png').convert_alpha(), pygame.image.load('img/timing_great_1.png').convert_alpha(), pygame.image.load('img/timing_good_1.png').convert_alpha(),
                    pygame.image.load('img/timing_ok_1.png').convert_alpha(), pygame.image.load('img/timing_break_1.png').convert_alpha(), pygame.image.load('img/timing_miss_1.png').convert_alpha()]
 
@@ -60,6 +62,8 @@ smallfont = pygame.font.Font("font/kotra_hope.ttf", 30)
 mediumfont = pygame.font.Font("font/kotra_hope.ttf", 45)
 bigfont = pygame.font.Font("font/kotra_hope.ttf", 50)
 combofont = pygame.font.Font("font/dangam.ttf", 66)
+resultscorefont = pygame.font.Font("font/dangam.ttf", 80)
+resulttimingfont = pygame.font.Font("font/kotra_hope.ttf", 60)
 
 
 is_running = True
@@ -84,7 +88,7 @@ PlayingMusicChannel = pygame.mixer.Channel(3)
 clock = pygame.time.Clock()
 is_tutorial = False
 
-global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count
+global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, score_text, timing_text_list
 
 
 ## 게임 플레이 변수를 초기화하는 함수
@@ -92,7 +96,7 @@ def play_init():
     global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, music_start_time, music_playtime
     combo = 0
     max_combo = 0
-    rate = -1
+    rate = 6
     key_press_time = 0
     miss_check_time = 0
     play_score = 0
@@ -167,9 +171,8 @@ def drop_notes():
 
 ## 키를 누른 시간과 노트 시간의 차이인 오차 시간을 측정한 뒤, 판정을 결정하는 함수
 def timing(note):
-    global rate
-    global combo
-    global key_press_time
+    global rate, combo, key_press_time, play_score
+    
     key_press_time = pygame.time.get_ticks()
     diff_time = key_press_time - note.exact_hit_time * 1000 - music_start_time
     print(diff_time)
@@ -180,6 +183,7 @@ def timing(note):
         rate = 0
         remove_note(note)
         combo += 1
+        play_score += 200
         SoundFXChannel.play(keysounds_1[0])
         timing_count[0] += 1
     elif abs(diff_time) <= 60:
@@ -226,22 +230,12 @@ def miss_check(note):
 
 ## 판정 이미지를 출력하는 함수 
 def show_timing(rate):
-    if pygame.time.get_ticks() - key_press_time < 250 or pygame.time.get_ticks() - miss_check_time < 250:      # 0.25초 동안 판정 보여주기 
-        SCREEN.blit(timing_img_list[rate], (490, 400))
-        '''
-        if rate == "Perfect!":
-            SCREEN.blit(timing_img_list[0], (490, 400))
-        elif rate == "Great":
-            SCREEN.blit(timing_img_list[1], (490, 400))
-        elif rate == "Good":
-            SCREEN.blit(timing_img_list[2], (490, 400))
-        elif rate == "OK":
-            SCREEN.blit(timing_img_list[3]g, (490, 400))
-        elif rate == "Break":
-            SCREEN.blit(timing_img_list[4], (490, 400))
-        elif rate == "Miss":
-            SCREEN.blit(timing_img_list[5], (490, 400))
-        '''
+    if pygame.time.get_ticks() - key_press_time < 250 or pygame.time.get_ticks() - miss_check_time < 250:
+        try:      # 0.25초 동안 판정 보여주기 
+            SCREEN.blit(timing_img_list[rate], (490, 400))
+        except IndexError:
+            pass
+
 
 ## 콤보 폰트를 출력하는 함수 
 def show_combo():
@@ -258,6 +252,14 @@ def check_max_combo():
     if combo > max_combo:
         max_combo = combo
 
+
+## 결과 화면 텍스트를 렌더하는 함수
+def render_result_texts(grade, clearrate, score, perfect_num, great_num, good_num, ok_num, break_num, miss_num):
+    global score_text, timing_text_list
+    score_text = resultscorefont.render(str(score), True, WHITE)
+    timing_text_list = [resulttimingfont.render(str(perfect_num), True, WHITE), resulttimingfont.render(str(great_num), True, WHITE), resulttimingfont.render(str(good_num), True, WHITE),
+                        resulttimingfont.render(str(ok_num), True, WHITE), resulttimingfont.render(str(break_num), True, WHITE), resulttimingfont.render(str(miss_num), True, WHITE)]
+    
 
 while is_running:
     if gamemode == 0:       ## 시작 화면
@@ -439,6 +441,7 @@ while is_running:
                     SCREEN.blit(combofont.render("Full combo", True, WHITE), (0, 0))
 
             if music_playtime > song_info_list[songlist_cursor][6].get_length() * 1000 + 5000:
+                render_result_texts(None, None, play_score, timing_count[0], timing_count[1], timing_count[2], timing_count[3], timing_count[4], timing_count[5])
                 gamemode = 3
 
         #SCREEN.blit(bigfont.render(str(music_playtime/1000), True, WHITE), (20, 20))
@@ -459,18 +462,22 @@ while is_running:
 
         SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
         SCREEN.blit(black_alpha_bg, (0, 0))
-        # ui 가디자인 (아직 미완료 - 커밋하지마!!!!!!!!!!!!)
-        SCREEN.blit(pygame.transform.scale(white_alpha_bg, (960, 720)), (160, 0))
+        # ui 가디자인 (아직 미완료)
+        #SCREEN.blit(pygame.transform.scale(white_alpha_bg, (960, 720)), (160, 0))
         pygame.draw.rect(SCREEN, YELLOW, (0, 0, 1280, 80))
         SCREEN.blit(mediumfont.render("PLAY RESULT", True, BLACK), (50, 15))
         pygame.draw.rect(SCREEN, GREEN, (240, 100, 350, 350))
         pygame.draw.rect(SCREEN, GRAY, (218, 465, 380, 60))
-        pygame.draw.rect(SCREEN, WHITE, (240, 540, 350, 80))
-        pygame.draw.rect(SCREEN, YELLOW, (160, 660, 960, 30))
-        
+        #pygame.draw.rect(SCREEN, WHITE, (240, 540, 350, 80))
+        #pygame.draw.rect(SCREEN, YELLOW, (160, 660, 960, 30))
+        #def draw_result_texts(grade, clearrate, score, perfect_num, great_num, good_num, ok_num, break_num, miss_num):
+        SCREEN.blit(score_text, score_text.get_rect(center=(415, 580)))
+        SCREEN.blit(smallfont.render("점수를 부스 담당 학생에게 알려 주세요!", True, WHITE), (500, 640))
+            
         for i in range(len(timing_count)):
             SCREEN.blit(pygame.transform.scale(timing_img_list[i], (200, 40)), (690, 65*i+170))
-            pygame.draw.rect(SCREEN, WHITE, (920, 65*i+170, 100, 40))
+            SCREEN.blit(timing_text_list[i], timing_text_list[i].get_rect(center=(1000, 65*i+193)))
+            #pygame.draw.rect(SCREEN, WHITE, (920, 65*i+170, 100, 40))
 
 
     # Secondly, try updating only the certain sprite(s) 
