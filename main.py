@@ -467,7 +467,18 @@ while is_running:
 
         SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
         SCREEN.blit(black_alpha_bg, (0, 0))
-
+        # ui 가디자인 (아직 미완료 - 커밋하지마!!!!!!!!!!!!)
+        SCREEN.blit(pygame.transform.scale(white_alpha_bg, (960, 720)), (160, 0))
+        pygame.draw.rect(SCREEN, YELLOW, (0, 0, 1280, 70))
+        SCREEN.blit(mediumfont.render("PLAY RESULT", True, BLACK), (50, 15))
+        pygame.draw.rect(SCREEN, GREEN, (240, 100, 350, 350))
+        pygame.draw.rect(SCREEN, GRAY, (218, 465, 380, 60))
+        pygame.draw.rect(SCREEN, WHITE, (240, 540, 350, 80))
+        pygame.draw.rect(SCREEN, YELLOW, (160, 660, 960, 30))
+        
+        for i in range(len(timing_count)):
+            SCREEN.blit(pygame.transform.scale(timing_perfect_img, (200, 40)), (690, 65*i+170))
+            pygame.draw.rect(SCREEN, WHITE, (920, 65*i+170, 100, 40))
 
 
 
