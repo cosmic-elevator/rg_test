@@ -13,7 +13,7 @@ HEIGHT = 720
 FPS = 60
 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption('rhythm game test')
+pygame.display.set_caption('Rhythmetric')
 pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONDOWN])
 
 WHITE = (245, 245, 245)
