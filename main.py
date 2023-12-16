@@ -37,6 +37,7 @@ white_alpha_bg = pygame.image.load('img/white_alpha_bg.png').convert_alpha()
 playbutton = pygame.image.load('img/playbutton.png').convert_alpha()
 forwardbutton = pygame.image.load('img/forwardbutton.png').convert_alpha()
 backbutton = pygame.image.load('img/backbutton.png').convert_alpha()
+tutorial_character = pygame.image.load('img/tuto_character.png').convert_alpha()
 song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')    # 효과음이 구림 ...
 
 grade_img_list = []
@@ -176,7 +177,7 @@ def timing(note):
     print(diff_time)
     
     # 판정은 넉넉하게, 세부 판정(점수)를 짜게 (판정은 잘 나오니까 기분은 좋고 / 점수는 변별이 되고)
-    if abs(diff_time) <= 40:
+    if abs(diff_time) <= 30:
         print('Perfect!')
         rate = 0
         remove_note(note)
@@ -258,6 +259,11 @@ def render_result_texts(grade, clearrate, score, perfect_num, great_num, good_nu
     timing_text_list = [resulttimingfont.render(str(perfect_num), True, WHITE), resulttimingfont.render(str(great_num), True, WHITE), resulttimingfont.render(str(good_num), True, WHITE),
                         resulttimingfont.render(str(ok_num), True, WHITE), resulttimingfont.render(str(break_num), True, WHITE), resulttimingfont.render(str(miss_num), True, WHITE)]
     
+
+## 튜토리얼을 출력하는 함수
+def tutorial_box():
+    pygame.draw.rect(SCREEN, BLACK, (WIDTH/2-500, HEIGHT/2-250, 1000, 500))
+    SCREEN.blit(tutorial_character, (80, 110))
 
 while is_running:
     if gamemode == 0:       ## 시작 화면
@@ -430,7 +436,7 @@ while is_running:
             
             if music_playtime > song_info_list[songlist_cursor][6].get_length() * 1000 + 500 and music_playtime <= song_info_list[songlist_cursor][6].get_length() * 1000 + 2400:
                 # 나중에 이미지 애니메이션으로 변경
-                if timing_count[0] == 26:
+                if timing_count[0] == 26:       # 나중에 변수로 변경
                     SCREEN.blit(combofont.render("All Perfect", True, WHITE), (0, 0))
                 elif max_combo == 26:
                     SCREEN.blit(combofont.render("Full combo", True, WHITE), (0, 0))
@@ -443,6 +449,8 @@ while is_running:
         SCREEN.blit(bigfont.render("SCORE: " + str(play_score), True, WHITE), (50, 580))
         SCREEN.blit(bigfont.render("MAX COMBO: " + str(max_combo), True, WHITE), (50, 630))
 
+        if is_tutorial:
+            tutorial_box()
 
     if gamemode == 3:    # 리절트 창
         for event in pygame.event.get():
