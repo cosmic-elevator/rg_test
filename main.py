@@ -4,7 +4,7 @@ from patternparser import *
 #from PIL import Image, ImageFilter, ImageEnhance
 
 
-pygame.mixer.pre_init(44100, 16, 2, 4096)
+pygame.mixer.pre_init(44100, -16, 2, 4096)
 pygame.init()
 pygame.mixer.init()
 
@@ -92,8 +92,10 @@ global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_
 
 
 ## 게임 플레이 변수를 초기화하는 함수
-def play_init():
+def play_init(cur_pattern_path):
     global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, music_start_time, music_playtime
+    
+    cur_pattern = Pattern(cur_pattern_path)
     combo = 0
     max_combo = 0
     rate = 6
@@ -102,7 +104,6 @@ def play_init():
     play_score = 0
     music_start_time = 0
     music_playtime = 0
-    cur_pattern = None
     # Perfect! / Great / Good / OK / Break / Miss
     timing_count = [0, 0, 0, 0, 0, 0]
 
@@ -118,10 +119,7 @@ def music_play(cursor):
     PlayingMusicChannel.play(song_info_list[cursor][6])
 
 
-## 커서에 해당하는 음악의 패턴을 불러오는 함수
-def pattern_load(cursor):
-    global cur_pattern
-    cur_pattern = Pattern(song_info_list[cursor][7])
+## 커서에 해당하는 음악의 패턴을 불러오는 함수 pattern_load => play_init으로 통합. 
     #cur_pattern.noteq_1 = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4), Note(1, 5), Note(1, 6), Note(1, 7), Note(1, 8)]
     #cur_pattern.noteq_2 = [Note(2, 1.5), Note(2, 2.5)]
     #cur_pattern.noteq_3 = [Note(3, 3.5), Note(3, 4.5)]
@@ -271,8 +269,8 @@ while is_running:
                 is_running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
-                    play_init()
                     is_tutorial = True
+                    play_init(song_info_list[0][7])
                     song_selected_time = pygame.time.get_ticks()
                     gamemode = 2    # T를 누르면 튜토리얼 플레이 화면으로 전환
                 elif event.key == pygame.K_SPACE:
@@ -299,7 +297,7 @@ while is_running:
                 if playbutton_rect.collidepoint(pos):
                     BgMusicChannel.stop()
                     SoundFXChannel.play(song_select_fx)
-                    play_init()
+                    play_init(song_info_list[songlist_cursor][7])
                     gamemode = 2
 
             if event.type == pygame.KEYDOWN:
@@ -315,7 +313,7 @@ while is_running:
                 if event.key == pygame.K_RETURN:
                     BgMusicChannel.stop()
                     SoundFXChannel.play(song_select_fx)
-                    play_init()
+                    play_init(song_info_list[songlist_cursor][7])
                     gamemode = 2
 
         #SCREEN.fill(BLACK)
@@ -383,12 +381,9 @@ while is_running:
                     gamemode = 1
 
                 if event.key == pygame.K_SPACE: 
-                    if not pygame.mixer.get_busy():
-                        if not cur_pattern:
-                            
-                            pattern_load(songlist_cursor)
-                            music_play(songlist_cursor)
-                            music_start_time = pygame.time.get_ticks()
+                    if music_playtime == 0:
+                        music_play(songlist_cursor)
+                        music_start_time = pygame.time.get_ticks()
                             
                 if event.key == pygame.K_d:
                     if music_start_time > 0:
