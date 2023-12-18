@@ -127,24 +127,52 @@ def music_play(cursor):
     #cur_pattern.noteq_4 = [Note(4, 5), Note(4, 6)]
 
 ## 노트 큐에서 노트를 제거하는 함수
-def remove_note(note):
-    if note.linenum == 1:
-        #notequeue_1.remove(note)
-        cur_pattern.noteq_1.remove(note)
-    elif note.linenum == 2:
-        #notequeue_2.remove(note)
-        cur_pattern.noteq_2.remove(note)
-    elif note.linenum == 3:
-        #notequeue_3.remove(note)
-        cur_pattern.noteq_3.remove(note)
-    elif note.linenum == 4:
-        #notequeue_4.remove(note)
-        cur_pattern.noteq_4.remove(note)
+def remove_note(n):
+        if n.linenum == 1:
+            #notequeue_1.remove(note)
+            cur_pattern.noteq_1.remove(n)
+        elif n.linenum == 2:
+            #notequeue_2.remove(note)
+            cur_pattern.noteq_2.remove(n)
+        elif n.linenum == 3:
+            #notequeue_3.remove(note)
+            cur_pattern.noteq_3.remove(n)
+        elif n.linenum == 4:
+            #notequeue_4.remove(note)
+            cur_pattern.noteq_4.remove(n)
 
+
+def remove_tail(tail):
+        if tail.linenum == 1:
+            cur_pattern.notetail_1.remove(tail)
+        elif tail.linenum == 2:
+            cur_pattern.notetail_2.remove(tail)
+        elif tail.linenum == 3:
+            cur_pattern.notetail_3.remove(tail)
+        elif tail.linenum == 4:
+            cur_pattern.notetail_4.remove(tail)
 
 ## 그냥 순수하게 노트 큐에 있는 노트를 떨어뜨리는 역할을 하는 함수.
         # 롱노트 테일을 추가해야 함!
 def drop_notes():
+    #'''
+    for tail in cur_pattern.notetail_1:
+        if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
+            tail.drop()
+            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
+    for tail in cur_pattern.notetail_2:
+        if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
+            tail.drop()
+            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
+    for tail in cur_pattern.notetail_3:
+        if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
+            tail.drop()
+            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
+    for tail in cur_pattern.notetail_4:
+        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
+            tail.drop()
+            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
+    #'''
     #for note in notequeue_1:
     for note in cur_pattern.noteq_1:
         # FPS * speed = pixel/second, judgeline_pixel * second/pixel = 노트가 내려오는 시간
@@ -169,24 +197,6 @@ def drop_notes():
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
 
             
-    #'''
-    for tail in cur_pattern.notetail_1:
-        if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
-            tail.drop()
-            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
-    for tail in cur_pattern.notetail_2:
-        if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
-            tail.drop()
-            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
-    for tail in cur_pattern.notetail_3:
-        if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
-            tail.drop()
-            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
-    for tail in cur_pattern.notetail_4:
-        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
-            tail.drop()
-            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
-    #'''
     
     
 
@@ -236,17 +246,21 @@ def timing(note):
         SoundFXChannel.play(keysounds_1[4])
         timing_count[4] += 1
 
-def miss_check(note):
+def miss_check(n):
     global combo
     global rate
     global miss_check_time
-    if note.rect.y >= 570:
+    #diff_time = key_press_time - note.exact_hit_time * 1000 - music_start_time
+    if n.rect.bottom >= 600:
         print('Miss')
         combo = 0
         rate = 5
         miss_check_time = pygame.time.get_ticks()
         timing_count[5] += 1
-        remove_note(note)
+        if type(n) == Note:
+            remove_note(n)
+        elif type(n) == Note_Tail:
+            remove_tail(n)
         
 
 ## 판정 이미지를 출력하는 함수 
@@ -287,10 +301,11 @@ def tutorial_box():
     pygame.draw.rect(SCREEN, BLACK, (WIDTH/2-500, HEIGHT/2-250, 1000, 500))
     SCREEN.blit(tutorial_character, (80, 110))
 
+
 while is_running:
     if gamemode == 0:       ## 시작 화면
         SCREEN.blit(startscreen_img, (0, 0))
-        start_text = mediumfont.render("튜토리얼을 진행하려면 T,\n바로 플레이하려면 Space를 눌러주세요.", True, BLACK)
+        start_text = mediumfont.render("튜토리얼을 진행하려면 T,바로 플레이하려면 Space를 눌러주세요.", True, BLACK)
         SCREEN.blit(start_text, start_text.get_rect(center=(WIDTH/2, 600)))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -393,6 +408,8 @@ while is_running:
         if pygame.key.get_pressed()[pygame.K_k]:
             SCREEN.blit(pink_keybeam, (740, 0))
 
+
+
         if not music_start_time:
             beforeplay_text = mediumfont.render("Space를 눌러 시작하세요!", True, WHITE)
             SCREEN.blit(beforeplay_text, beforeplay_text.get_rect(center=(WIDTH/2, HEIGHT/2)))
@@ -455,6 +472,15 @@ while is_running:
                     miss_check(cur_pattern.noteq_3[0])
                 if cur_pattern.noteq_4:                   
                     miss_check(cur_pattern.noteq_4[0])
+
+                if cur_pattern.notetail_1:                   
+                    miss_check(cur_pattern.notetail_1[0])
+                if cur_pattern.notetail_2:                   
+                    miss_check(cur_pattern.notetail_2[0])
+                if cur_pattern.notetail_3:                   
+                    miss_check(cur_pattern.notetail_3[0])
+                if cur_pattern.notetail_4:                   
+                    miss_check(cur_pattern.notetail_4[0])
             
             if music_playtime > song_info_list[songlist_cursor][6].get_length() * 1000 + 500 and music_playtime <= song_info_list[songlist_cursor][6].get_length() * 1000 + 2400:
                 # 나중에 이미지 애니메이션으로 변경
@@ -471,8 +497,8 @@ while is_running:
         SCREEN.blit(bigfont.render("SCORE: " + str(play_score), True, WHITE), (50, 580))
         SCREEN.blit(bigfont.render("MAX COMBO: " + str(max_combo), True, WHITE), (50, 630))
 
-        if is_tutorial:
-            tutorial_box()
+        #if is_tutorial:
+            #tutorial_box()
 
     if gamemode == 3:    # 리절트 창
         for event in pygame.event.get():
