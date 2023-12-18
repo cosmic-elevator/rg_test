@@ -10,7 +10,7 @@ pygame.mixer.init()
 
 WIDTH = 1280
 HEIGHT = 720
-FPS = 60
+#FPS = 60
 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Rhythmetric')
@@ -50,7 +50,7 @@ keysounds_1 = [pygame.mixer.Sound('fx/keysound_perfect_1.wav'), pygame.mixer.Sou
                pygame.mixer.Sound('fx/keysound_ok_1.wav'), pygame.mixer.Sound('fx/keysound_break_1.wav')]
 
 ### 0: 곡 제목 / 1: 아티스트 이름 / 2: 장르명 / 3: 앨범커버 (380x380) / 4: 아이캐치 / 5: 곡 하이라이트 파일 / 6: 곡 전체 파일 / 7: 패턴 위치 문자열
-song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png').convert(), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/jumuck.bms"], 
+song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png').convert(), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/test.bms"], 
                   ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png').convert(), pygame.image.load('img/our_rhythmetric_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/our_rhythmetric.wav'), pygame.mixer.Sound('song/our_rhythmetric.wav'), None], 
                   ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png').convert(), pygame.image.load('img/dreamcandy_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/dreamcandy.wav'), pygame.mixer.Sound('song/dreamcandy.wav'), None]
                   ]
@@ -143,13 +143,14 @@ def remove_note(note):
 
 
 ## 그냥 순수하게 노트 큐에 있는 노트를 떨어뜨리는 역할을 하는 함수.
+        # 롱노트 테일을 추가해야 함!
 def drop_notes():
     #for note in notequeue_1:
     for note in cur_pattern.noteq_1:
-        # 이거 계산식 어떻게 나온 거지???????????????
         # FPS * speed = pixel/second, judgeline_pixel * second/pixel = 노트가 내려오는 시간
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
             note.drop()
+            #SCREEN.blit(note, (note.rect.x, note.rect.y))
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
     #for note in notequeue_2:
     for note in cur_pattern.noteq_2:
@@ -166,6 +167,27 @@ def drop_notes():
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
             note.drop()
             SCREEN.blit(note.image, (note.rect.x, note.rect.y))
+
+            
+    #'''
+    for tail in cur_pattern.notetail_1:
+        if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
+            tail.drop()
+            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
+    for tail in cur_pattern.notetail_2:
+        if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
+            tail.drop()
+            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
+    for tail in cur_pattern.notetail_3:
+        if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
+            tail.drop()
+            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
+    for tail in cur_pattern.notetail_4:
+        if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
+            tail.drop()
+            SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
+    #'''
+    
     
 
 ## 키를 누른 시간과 노트 시간의 차이인 오차 시간을 측정한 뒤, 판정을 결정하는 함수

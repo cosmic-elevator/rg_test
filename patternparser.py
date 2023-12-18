@@ -9,6 +9,15 @@ class Pattern():
         self.noteq_2 = []
         self.noteq_3 = []
         self.noteq_4 = []
+        self.notetail_1 = []
+        self.notetail_2 = []
+        self.notetail_3 = []
+        self.notetail_4 = []
+        self.temp_longnote_stack_1 = []
+        self.temp_longnote_stack_2 = []
+        self.temp_longnote_stack_3 = []
+        self.temp_longnote_stack_4 = []
+
         self.total_notes = 0
         self.note_add_status = 0
         self.loading_percent = 0
@@ -72,12 +81,14 @@ class Pattern():
 
     def add_note(self, barnum, linenum, note_data_list):
     # for문을 돌면서 해당 마디 해당 라인에 있는 노트를 전부 리스트에 저장한다.
+        #print(len(note_data_list)) ->  이제 add_note가 불러와지는 횟수는 옳음
         for i in range(len(note_data_list)):
-            if note_data_list[i] != "00":
+            if note_data_list[i] == "01":
+                #print('01')
+                self.note_add_status += 1
                 detail_beat = barnum + (i / len(note_data_list))
                 note_expect_hit_time = self.calculate_time(self.bpm, detail_beat)
                 #print(note_expect_hit_time)
-                self.note_add_status += 1
 
                 if linenum == 1:
                     self.noteq_1.append(Note(1, note_expect_hit_time))
@@ -87,6 +98,56 @@ class Pattern():
                     self.noteq_3.append(Note(3, note_expect_hit_time))
                 elif linenum == 4:
                     self.noteq_4.append(Note(4, note_expect_hit_time))
+
+            ### 여기 싹 다 갈아야 함 !!!!!! 
+            if note_data_list[i] == "02":
+                #print('02')
+                self.note_add_status += 1
+                detail_beat = barnum + (i / len(note_data_list))
+                note_expect_hit_time = self.calculate_time(self.bpm, detail_beat)
+                
+                # 라인별로 리스트가 비어 있는지 체크한다 (비어 있다 -> 다른 객체가 존재하지 않는다 -> 롱노트의 첫 노트이다)
+                # 롱노트의 헤드 시간을 저장하는 코드 
+                if not self.temp_longnote_stack_1 and linenum == 1:    
+                    self.temp_longnote_stack_1.append(note_expect_hit_time)
+
+                elif not self.temp_longnote_stack_2 and linenum == 2:
+                    self.temp_longnote_stack_2.append(note_expect_hit_time)
+
+                elif not self.temp_longnote_stack_3 and linenum == 3:
+                    self.temp_longnote_stack_3.append(note_expect_hit_time)
+
+                elif not self.temp_longnote_stack_4 and linenum == 4:
+                    self.temp_longnote_stack_4.append(note_expect_hit_time)
+                
+                # 롱노트의 끝 틱 시간을 저장하는 함수
+                else:
+                    if linenum == 1:
+                        self.noteq_1.append(Note(1, self.temp_longnote_stack_1[0]))
+                        self.notetail_1.append(Note_Tail(1, self.temp_longnote_stack_1[0], note_expect_hit_time - self.temp_longnote_stack_1[0]))
+                        print(self.temp_longnote_stack_1[0], note_expect_hit_time - self.temp_longnote_stack_1[0])
+                        self.temp_longnote_stack_1.pop()
+                    
+                    if linenum == 2:
+                        self.noteq_2.append(Note(1, self.temp_longnote_stack_2[0]))
+                        self.notetail_2.append(Note_Tail(2, self.temp_longnote_stack_2[0], note_expect_hit_time - self.temp_longnote_stack_2[0]))
+                        #print(note_expect_hit_time, note_expect_hit_time - self.temp_longnote_stack_1[0])
+                        self.temp_longnote_stack_2.pop()
+
+                    if linenum == 3:
+                        self.noteq_3.append(Note(1, self.temp_longnote_stack_3[0]))
+                        self.notetail_3.append(Note_Tail(3, self.temp_longnote_stack_3[0], note_expect_hit_time - self.temp_longnote_stack_3[0]))
+                        #print(note_expect_hit_time, note_expect_hit_time - self.temp_longnote_stack_1[0])
+                        self.temp_longnote_stack_3.pop()
+
+                    if linenum == 4:
+                        self.noteq_4.append(Note(1, self.temp_longnote_stack_4[0]))
+                        self.notetail_4.append(Note_Tail(4, self.temp_longnote_stack_4[0], note_expect_hit_time - self.temp_longnote_stack_4[0]))
+                        #print(note_expect_hit_time, note_expect_hit_time - self.temp_longnote_stack_1[0])
+                        self.temp_longnote_stack_4.pop()
+
+
+                self.note_add_status -= 1
 
 
     def calculate_time(self, bpm, detail_beat):
@@ -100,10 +161,6 @@ class Pattern():
     
 
 
-#test_pt = Pattern('pattern/jumuck.bms')
-
-#for note in test_pt.noteq_1:
-    #print(note.exact_hit_time)
-
-    #exact_hit_time이 제대로 계산되지 않는 문제가 있다
-    #노트 개수는 제대로 계산되고 있는가?
+test_pt = Pattern('pattern/test.bms')
+for i in test_pt.notetail_1:
+    print(i.tail_length)
