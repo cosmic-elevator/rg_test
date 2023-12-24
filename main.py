@@ -530,7 +530,7 @@ while is_running:
         SCREEN.blit(mediumfont.render("PLAY RESULT", True, BLACK), (50, 15))
         pygame.draw.rect(SCREEN, GREEN, (240, 100, 350, 350))
         #pygame.draw.rect(SCREEN, GRAY, (218, 465, 380, 60))
-        SCREEN.blit(ap_img, (218, 465))
+        #SCREEN.blit(ap_img, (218, 465))
         #pygame.draw.rect(SCREEN, WHITE, (240, 540, 350, 80)) 
         #pygame.draw.rect(SCREEN, YELLOW, (160, 660, 960, 30))
         #def draw_result_texts(grade, clearrate, score, perfect_num, great_num, good_num, ok_num, break_num, miss_num):
