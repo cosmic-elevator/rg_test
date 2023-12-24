@@ -91,12 +91,12 @@ PlayingMusicChannel = pygame.mixer.Channel(3)
 clock = pygame.time.Clock()
 is_tutorial = False
 
-global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, score_text, timing_text_list
-
+global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, score_text, timing_text_list, is_ap, is_fc
+cur_pattern = None
 
 ## 게임 플레이 변수를 초기화하는 함수
 def play_init(cur_pattern_path):
-    global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, music_start_time, music_playtime
+    global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, music_start_time, music_playtime, is_ap, is_fc
     
     cur_pattern = Pattern(cur_pattern_path)
     combo = 0
@@ -109,6 +109,9 @@ def play_init(cur_pattern_path):
     music_playtime = 0
     # Perfect! / Great / Good / OK / Break / Miss
     timing_count = [0, 0, 0, 0, 0, 0]
+
+    is_ap = False
+    is_fc = False
 
 
 ## 곡 프리뷰를 반복 재생하는 함수
@@ -157,7 +160,7 @@ def remove_tail(tail):
 ## 그냥 순수하게 노트 큐에 있는 노트를 떨어뜨리는 역할을 하는 함수.
         # 롱노트 테일을 추가해야 함!
 def drop_notes():
-    #'''
+    '''
     for tail in cur_pattern.notetail_1:
         if music_playtime/1000 >= tail.exact_hit_time - (500 / (FPS * speed)):
             tail.drop()
@@ -174,7 +177,7 @@ def drop_notes():
         if music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
             tail.drop()
             SCREEN.blit(tail.image, (tail.rect.x, tail.rect.y))
-    #'''
+    '''
     #for note in notequeue_1:
     for note in cur_pattern.noteq_1:
         # FPS * speed = pixel/second, judgeline_pixel * second/pixel = 노트가 내려오는 시간
@@ -303,13 +306,16 @@ def render_result_texts(grade, clearrate, score, perfect_num, great_num, good_nu
 
 ## 튜토리얼을 출력하는 함수
 def show_tutorial():
-    #pygame.draw.rect(SCREEN, BLACK, (WIDTH/2-500, HEIGHT/2-250, 1000, 500))
-    SCREEN.blit(black_alpha_bg, (0, 0))
-    SCREEN.blit(tutorial_img, (30, 0))
+    if is_tutorial:
+        #pygame.draw.rect(SCREEN, BLACK, (WIDTH/2-500, HEIGHT/2-250, 1000, 500))
+        SCREEN.blit(black_alpha_bg, (0, 0))
+        SCREEN.blit(tutorial_img, (30, 0))
 
 
 while is_running:
     if gamemode == 0:       ## 시작 화면
+        pygame.mixer.stop()
+        is_tutorial = False
         SCREEN.blit(startscreen_img, (0, 0))
         start_text = mediumfont.render("튜토리얼을 진행하려면 T,바로 플레이하려면 Space를 눌러주세요.", True, BLACK)
         SCREEN.blit(start_text, start_text.get_rect(center=(WIDTH/2, 600)))
@@ -324,6 +330,7 @@ while is_running:
                     gamemode = 2    # T를 누르면 튜토리얼 플레이 화면으로 전환
                 elif event.key == pygame.K_SPACE:
                     gamemode = 1
+
                 
     if gamemode == 1:       ## 곡 선택 화면
         for event in pygame.event.get():
@@ -351,7 +358,30 @@ while is_running:
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    gamemode = 0
+                    if is_tutorial:
+                        is_tutorial = False
+                    else:
+                        gamemode = 0
+
+                if event.key == pygame.K_SPACE:
+                    if is_tutorial:
+                        is_tutorial = False
+                    else:
+                        BgMusicChannel.stop()
+                        SoundFXChannel.play(song_select_fx)
+                        play_init(song_info_list[songlist_cursor][7])
+                        gamemode = 2
+  
+                if event.key == pygame.K_1:
+                    is_tutorial = True
+
+                if event.key == pygame.K_2:
+                    print('아직 구현하지 못했습니다.')
+                    #gamemode = 4
+
+                if event.key == pygame.K_3:
+                    print('아직 구현하지 못했습니다.')
+                    #gamemode = 5 (만든 사람들 크레딧)
 
                 if event.key == pygame.K_UP:
                     songlist_cursor = (songlist_cursor - 1) % len(song_info_list)
@@ -365,7 +395,6 @@ while is_running:
                     play_init(song_info_list[songlist_cursor][7])
                     gamemode = 2
 
-        #SCREEN.fill(BLACK)
         SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
         SCREEN.blit(black_alpha_bg, (0, 0))
         SCREEN.blit(white_alpha_bg, (80, 70))
@@ -395,6 +424,8 @@ while is_running:
                 pygame.draw.rect(SCREEN, BLACK, [640, (120*i+110), 560, 100])
                 SCREEN.blit(smallfont.render(song_info_list[i][0], True, WHITE), (660, 120*i+125))
                 SCREEN.blit(smallfont.render(song_info_list[i][1], True, WHITE), (660, 120*i+155))
+
+        show_tutorial()
         
     
 
@@ -429,7 +460,8 @@ while is_running:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     PlayingMusicChannel.stop()
-                    # 게임 오버 창?
+                    if is_tutorial:
+                        is_tutorial = False
                     gamemode = 1
 
                 if event.key == pygame.K_SPACE: 
@@ -497,8 +529,10 @@ while is_running:
                 # 나중에 이미지 애니메이션으로 변경
                 if timing_count[0] == 26:       # 나중에 변수로 변경
                     SCREEN.blit(combofont.render("All Perfect", True, WHITE), (0, 0))
+                    is_ap = True
                 elif max_combo == 26:
                     SCREEN.blit(combofont.render("Full combo", True, WHITE), (0, 0))
+                    is_fc = True
 
             if music_playtime > song_info_list[songlist_cursor][6].get_length() * 1000 + 5000:
                 render_result_texts(None, None, play_score, timing_count[0], timing_count[1], timing_count[2], timing_count[3], timing_count[4], timing_count[5])
@@ -508,8 +542,8 @@ while is_running:
         SCREEN.blit(bigfont.render("SCORE: " + str(play_score), True, WHITE), (50, 580))
         SCREEN.blit(bigfont.render("MAX COMBO: " + str(max_combo), True, WHITE), (50, 630))
 
-        if is_tutorial:
-            show_tutorial()
+
+        show_tutorial()
 
     if gamemode == 3:    # 리절트 창
         for event in pygame.event.get():
@@ -530,7 +564,11 @@ while is_running:
         SCREEN.blit(mediumfont.render("PLAY RESULT", True, BLACK), (50, 15))
         pygame.draw.rect(SCREEN, GREEN, (240, 100, 350, 350))
         #pygame.draw.rect(SCREEN, GRAY, (218, 465, 380, 60))
-        #SCREEN.blit(ap_img, (218, 465))
+        if is_ap:
+            SCREEN.blit(ap_img, (218, 465))
+        elif is_fc:
+            SCREEN.blit(fc_img, (218, 465))
+
         #pygame.draw.rect(SCREEN, WHITE, (240, 540, 350, 80)) 
         #pygame.draw.rect(SCREEN, YELLOW, (160, 660, 960, 30))
         #def draw_result_texts(grade, clearrate, score, perfect_num, great_num, good_num, ok_num, break_num, miss_num):
@@ -543,9 +581,37 @@ while is_running:
             #pygame.draw.rect(SCREEN, WHITE, (920, 65*i+170, 100, 40))
 
 
-    # Secondly, try updating only the certain sprite(s) 
-    # by passing the sprite(s) rect(s) into the update() function. 
-    # This updates only those specific sprite(s), saving a lot of performance.
+    if gamemode == 4:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    gamemode = 1
+                if event.key == pygame.K_SPACE:
+                    if not cur_pattern:
+                        cur_pattern = Pattern('pattern/speedtest.bms')
+                        music_start_time = pygame.time.get_ticks()
+                if event.key == pygame.K_LEFT or event.key == pygame.K_DOWN:
+                    speed -= 1
+                if event.key == pygame.K_RIGHT or event.key == pygame.K_UP:
+                    speed += 1
+
+        SCREEN.fill(BLACK)
+        pygame.mixer.stop()
+
+        pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2, HEIGHT/2+140, 200, 10])
+        if pygame.key.get_pressed()[pygame.K_f]:
+            SCREEN.blit(pink_keybeam, (590, 0))
+
+
+        if music_start_time > 0:
+            if cur_pattern.noteq_2:
+                drop_notes()   
+                miss_check(cur_pattern.noteq_2[0])
+
+
+
     pygame.display.update() 
     clock.tick(FPS)
 
