@@ -37,7 +37,9 @@ white_alpha_bg = pygame.image.load('img/white_alpha_bg.png').convert_alpha()
 playbutton = pygame.image.load('img/playbutton.png').convert_alpha()
 forwardbutton = pygame.image.load('img/forwardbutton.png').convert_alpha()
 backbutton = pygame.image.load('img/backbutton.png').convert_alpha()
-tutorial_character = pygame.image.load('img/tuto_character.png').convert_alpha()
+tutorial_img = pygame.image.load('img/tutorial_img.png').convert_alpha()
+ap_img = pygame.image.load('img/allperfect.png').convert_alpha()
+fc_img = pygame.image.load('img/fullcombo.png').convert_alpha()
 song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')    # 효과음이 구림 ...
 
 grade_img_list = []
@@ -50,7 +52,7 @@ keysounds_1 = [pygame.mixer.Sound('fx/keysound_perfect_1.wav'), pygame.mixer.Sou
                pygame.mixer.Sound('fx/keysound_ok_1.wav'), pygame.mixer.Sound('fx/keysound_break_1.wav')]
 
 ### 0: 곡 제목 / 1: 아티스트 이름 / 2: 장르명 / 3: 앨범커버 (380x380) / 4: 아이캐치 / 5: 곡 하이라이트 파일 / 6: 곡 전체 파일 / 7: 패턴 위치 문자열
-song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png').convert(), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/test.bms"], 
+song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png').convert(), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/jumuck.bms"], 
                   ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png').convert(), pygame.image.load('img/our_rhythmetric_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/our_rhythmetric.wav'), pygame.mixer.Sound('song/our_rhythmetric.wav'), None], 
                   ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png').convert(), pygame.image.load('img/dreamcandy_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/dreamcandy.wav'), pygame.mixer.Sound('song/dreamcandy.wav'), None]
                   ]
@@ -214,7 +216,7 @@ def timing(note):
         rate = 0
         remove_note(note)
         combo += 1
-        play_score += 200
+        play_score += 900
         SoundFXChannel.play(keysounds_1[0])
         timing_count[0] += 1
     elif abs(diff_time) <= 60:
@@ -222,6 +224,7 @@ def timing(note):
         rate = 1
         remove_note(note)
         combo += 1
+        play_score += 440
         SoundFXChannel.play(keysounds_1[1])
         timing_count[1] += 1
     elif abs(diff_time) <= 110:
@@ -229,6 +232,7 @@ def timing(note):
         rate = 2
         remove_note(note)
         combo += 1
+        play_score += 210
         SoundFXChannel.play(keysounds_1[2])
         timing_count[2] += 1
     elif abs(diff_time) <= 210:
@@ -236,6 +240,7 @@ def timing(note):
         rate = 3
         remove_note(note)
         combo = 0
+        play_score += 100
         SoundFXChannel.play(keysounds_1[3])
         timing_count[3] += 1
     elif abs(diff_time) <= 500:
@@ -297,9 +302,10 @@ def render_result_texts(grade, clearrate, score, perfect_num, great_num, good_nu
     
 
 ## 튜토리얼을 출력하는 함수
-def tutorial_box():
-    pygame.draw.rect(SCREEN, BLACK, (WIDTH/2-500, HEIGHT/2-250, 1000, 500))
-    SCREEN.blit(tutorial_character, (80, 110))
+def show_tutorial():
+    #pygame.draw.rect(SCREEN, BLACK, (WIDTH/2-500, HEIGHT/2-250, 1000, 500))
+    SCREEN.blit(black_alpha_bg, (0, 0))
+    SCREEN.blit(tutorial_img, (30, 0))
 
 
 while is_running:
@@ -398,6 +404,7 @@ while is_running:
         pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
         # 나중에 bga / 아이캐치 / 기어 추가 
 
+        pygame.event.pump()
 
         if pygame.key.get_pressed()[pygame.K_d]:
             SCREEN.blit(pink_keybeam, (440, 0))
@@ -426,7 +433,9 @@ while is_running:
                     gamemode = 1
 
                 if event.key == pygame.K_SPACE: 
-                    if music_playtime == 0:
+                    if is_tutorial:
+                        is_tutorial = False
+                    elif music_playtime == 0:
                         music_play(songlist_cursor)
                         music_start_time = pygame.time.get_ticks()
                             
@@ -473,6 +482,7 @@ while is_running:
                 if cur_pattern.noteq_4:                   
                     miss_check(cur_pattern.noteq_4[0])
 
+                '''
                 if cur_pattern.notetail_1:                   
                     miss_check(cur_pattern.notetail_1[0])
                 if cur_pattern.notetail_2:                   
@@ -481,6 +491,7 @@ while is_running:
                     miss_check(cur_pattern.notetail_3[0])
                 if cur_pattern.notetail_4:                   
                     miss_check(cur_pattern.notetail_4[0])
+                '''
             
             if music_playtime > song_info_list[songlist_cursor][6].get_length() * 1000 + 500 and music_playtime <= song_info_list[songlist_cursor][6].get_length() * 1000 + 2400:
                 # 나중에 이미지 애니메이션으로 변경
@@ -497,8 +508,8 @@ while is_running:
         SCREEN.blit(bigfont.render("SCORE: " + str(play_score), True, WHITE), (50, 580))
         SCREEN.blit(bigfont.render("MAX COMBO: " + str(max_combo), True, WHITE), (50, 630))
 
-        #if is_tutorial:
-            #tutorial_box()
+        if is_tutorial:
+            show_tutorial()
 
     if gamemode == 3:    # 리절트 창
         for event in pygame.event.get():
@@ -518,8 +529,9 @@ while is_running:
         pygame.draw.rect(SCREEN, YELLOW, (0, 0, 1280, 80))
         SCREEN.blit(mediumfont.render("PLAY RESULT", True, BLACK), (50, 15))
         pygame.draw.rect(SCREEN, GREEN, (240, 100, 350, 350))
-        pygame.draw.rect(SCREEN, GRAY, (218, 465, 380, 60))
-        #pygame.draw.rect(SCREEN, WHITE, (240, 540, 350, 80))
+        #pygame.draw.rect(SCREEN, GRAY, (218, 465, 380, 60))
+        SCREEN.blit(ap_img, (218, 465))
+        #pygame.draw.rect(SCREEN, WHITE, (240, 540, 350, 80)) 
         #pygame.draw.rect(SCREEN, YELLOW, (160, 660, 960, 30))
         #def draw_result_texts(grade, clearrate, score, perfect_num, great_num, good_num, ok_num, break_num, miss_num):
         SCREEN.blit(score_text, score_text.get_rect(center=(415, 580)))
