@@ -124,25 +124,25 @@ class Pattern():
                 else:
                     if linenum == 1:
                         self.noteq_1.append(Note(1, self.temp_longnote_stack_1[0]))
-                        self.notetail_1.append(Note_Tail(1, self.temp_longnote_stack_1[0], note_expect_hit_time - self.temp_longnote_stack_1[0]))
+                        #self.notetail_1.append(Note_Tail(1, self.temp_longnote_stack_1[0], note_expect_hit_time - self.temp_longnote_stack_1[0]))
                         print(self.temp_longnote_stack_1[0], note_expect_hit_time - self.temp_longnote_stack_1[0])
                         self.temp_longnote_stack_1.pop()
                     
                     if linenum == 2:
                         self.noteq_2.append(Note(1, self.temp_longnote_stack_2[0]))
-                        self.notetail_2.append(Note_Tail(2, self.temp_longnote_stack_2[0], note_expect_hit_time - self.temp_longnote_stack_2[0]))
+                        #self.notetail_2.append(Note_Tail(2, self.temp_longnote_stack_2[0], note_expect_hit_time - self.temp_longnote_stack_2[0]))
                         #print(note_expect_hit_time, note_expect_hit_time - self.temp_longnote_stack_1[0])
                         self.temp_longnote_stack_2.pop()
 
                     if linenum == 3:
                         self.noteq_3.append(Note(1, self.temp_longnote_stack_3[0]))
-                        self.notetail_3.append(Note_Tail(3, self.temp_longnote_stack_3[0], note_expect_hit_time - self.temp_longnote_stack_3[0]))
+                        #self.notetail_3.append(Note_Tail(3, self.temp_longnote_stack_3[0], note_expect_hit_time - self.temp_longnote_stack_3[0]))
                         #print(note_expect_hit_time, note_expect_hit_time - self.temp_longnote_stack_1[0])
                         self.temp_longnote_stack_3.pop()
 
                     if linenum == 4:
                         self.noteq_4.append(Note(1, self.temp_longnote_stack_4[0]))
-                        self.notetail_4.append(Note_Tail(4, self.temp_longnote_stack_4[0], note_expect_hit_time - self.temp_longnote_stack_4[0]))
+                        #self.notetail_4.append(Note_Tail(4, self.temp_longnote_stack_4[0], note_expect_hit_time - self.temp_longnote_stack_4[0]))
                         #print(note_expect_hit_time, note_expect_hit_time - self.temp_longnote_stack_1[0])
                         self.temp_longnote_stack_4.pop()
 

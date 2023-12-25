@@ -20,6 +20,7 @@ pink_keybeam = pygame.image.load('img/pink_keybeam.png').convert_alpha()
 
 startscreen_img = pygame.image.load('img/rhythmetric_main.png').convert()
 cover_gradient_bg = pygame.image.load('img/cover_gradient_bg.png').convert_alpha()
+alpaca_bg = pygame.image.load('img/alpaca.jpeg').convert_alpha()
 black_alpha_bg = pygame.image.load('img/black_alpha_bg.png').convert_alpha()
 white_alpha_bg = pygame.image.load('img/white_alpha_bg.png').convert_alpha()
 playbutton = pygame.image.load('img/playbutton.png').convert_alpha()
@@ -30,7 +31,8 @@ ap_img = pygame.image.load('img/allperfect.png').convert_alpha()
 fc_img = pygame.image.load('img/fullcombo.png').convert_alpha()
 song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')    # 효과음이 구림 ...
 
-grade_img_list = []
+# 순서대로 F / C / B / A / S
+grade_img_list = [pygame.image.load('img/grade_f.png'), pygame.image.load('img/grade_c.png'), pygame.image.load('img/grade_b.png'), pygame.image.load('img/grade_a.png'), pygame.image.load('img/grade_s.png')]
 
 timing_img_list = [pygame.image.load('img/timing_perfect_1.png').convert_alpha(), pygame.image.load('img/timing_great_1.png').convert_alpha(), pygame.image.load('img/timing_good_1.png').convert_alpha(),
                    pygame.image.load('img/timing_ok_1.png').convert_alpha(), pygame.image.load('img/timing_break_1.png').convert_alpha(), pygame.image.load('img/timing_miss_1.png').convert_alpha()]
@@ -56,6 +58,14 @@ combofont = pygame.font.Font("font/dangam.ttf", 66)
 resultscorefont = pygame.font.Font("font/dangam.ttf", 80)
 resulttimingfont = pygame.font.Font("font/kotra_hope.ttf", 60)
 
+start_text = mediumfont.render("튜토리얼을 진행하려면 T, 바로 플레이하려면 Space를 눌러주세요.", True, BLACK)
+coder_text = mediumfont.render("Programming : 최수지", True, WHITE)
+designer_text = mediumfont.render("Graphic : 최수지", True, WHITE)
+composer_text = mediumfont.render("Composers : 유태상, 최수지", True, WHITE)
+testplayer_text = mediumfont.render("Test Players : 박대선, 어아름, 이보영, 정희수, 지진구 외", True, WHITE)
+everyone_text = mediumfont.render("그리고 Rhythmetric을 즐겨주시는 여러분들", True, WHITE)
+thanks_text = bigfont.render("정말 감사드립니다!", True, WHITE)
+
 
 is_running = True
 gamemode = 0
@@ -78,6 +88,7 @@ PlayingMusicChannel = pygame.mixer.Channel(3)
 
 clock = pygame.time.Clock()
 is_tutorial = False
+frame_count = 0
 
 global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, score_text, timing_text_list, is_ap, is_fc
 
@@ -312,7 +323,6 @@ while is_running:
         pygame.mixer.stop()
         is_tutorial = False
         SCREEN.blit(startscreen_img, (0, 0))
-        start_text = mediumfont.render("튜토리얼을 진행하려면 T,바로 플레이하려면 Space를 눌러주세요.", True, BLACK)
         SCREEN.blit(start_text, start_text.get_rect(center=(WIDTH/2, 600)))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -378,8 +388,9 @@ while is_running:
                     pygame.mixer.stop()
 
                 if event.key == pygame.K_3:
-                    print('아직 구현하지 못했습니다.')
-                    #gamemode = 5 (만든 사람들 크레딧)
+                    #print('아직 구현하지 못했습니다.')
+                    gamemode = 5 #(만든 사람들 크레딧)
+                    BgMusicChannel.play(song_info_list[1][5])
 
                 if event.key == pygame.K_UP:
                     songlist_cursor = (songlist_cursor - 1) % len(song_info_list)
@@ -562,7 +573,19 @@ while is_running:
         #SCREEN.blit(pygame.transform.scale(white_alpha_bg, (960, 720)), (160, 0))
         pygame.draw.rect(SCREEN, YELLOW, (0, 0, 1280, 80))
         SCREEN.blit(mediumfont.render("PLAY RESULT", True, BLACK), (50, 15))
-        pygame.draw.rect(SCREEN, GREEN, (240, 100, 350, 350))
+        #pygame.draw.rect(SCREEN, GREEN, (240, 100, 350, 350))
+        
+        if play_score < 60000:
+            SCREEN.blit(pygame.transform.scale(grade_img_list[0], (330, 330)), (250, 130))
+        elif play_score < 70000:
+            SCREEN.blit(pygame.transform.scale(grade_img_list[1], (330, 330)), (250, 130))
+        elif play_score < 80000:
+            SCREEN.blit(pygame.transform.scale(grade_img_list[2], (330, 330)), (250, 130))
+        elif play_score < 90000:
+            SCREEN.blit(pygame.transform.scale(grade_img_list[3], (330, 330)), (250, 130))
+        elif play_score <= 100000:
+            SCREEN.blit(pygame.transform.scale(grade_img_list[4], (330, 330)), (250, 130))
+            
         
         if is_ap:
             SCREEN.blit(ap_img, (218, 465))
@@ -576,8 +599,8 @@ while is_running:
         SCREEN.blit(smallfont.render("점수를 부스 담당 학생에게 알려 주세요!", True, WHITE), (500, 640))
             
         for i in range(len(timing_count)):
-            SCREEN.blit(pygame.transform.scale(timing_img_list[i], (200, 40)), (690, 65*i+170))
-            SCREEN.blit(timing_text_list[i], timing_text_list[i].get_rect(center=(1000, 65*i+193)))
+            SCREEN.blit(pygame.transform.scale(timing_img_list[i], (200, 40)), (690, 65*i+200))
+            SCREEN.blit(timing_text_list[i], timing_text_list[i].get_rect(center=(1000, 65*i+223)))
             #pygame.draw.rect(SCREEN, WHITE, (920, 65*i+170, 100, 40))
 
 
@@ -621,6 +644,37 @@ while is_running:
             SCREEN.blit(beforeplay_text, beforeplay_text.get_rect(center=(WIDTH/2, HEIGHT/2+40)))
 
 
+
+    if gamemode == 5:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    gamemode = 1
+                    frame_count = 0
+                    pygame.mixer.stop()
+
+
+        SCREEN.blit(alpaca_bg, (0, 0))
+        SCREEN.blit(black_alpha_bg, (0, 0))
+
+
+        if frame_count / 120 >= 2:
+            SCREEN.blit(coder_text, coder_text.get_rect(center=(WIDTH/2, 100)))
+        if frame_count / 120 >= 3:
+            SCREEN.blit(designer_text, designer_text.get_rect(center=(WIDTH/2, 170)))
+        if frame_count / 120 >= 4:
+            SCREEN.blit(composer_text, composer_text.get_rect(center=(WIDTH/2, 240)))
+        if frame_count / 120 >= 5:
+            SCREEN.blit(testplayer_text, testplayer_text.get_rect(center=(WIDTH/2, 310)))
+        if frame_count / 120 >= 6:
+            SCREEN.blit(everyone_text, everyone_text.get_rect(center=(WIDTH/2, 440)))
+        if frame_count / 120 >= 7:
+            SCREEN.blit(thanks_text, thanks_text.get_rect(center=(WIDTH/2, 580)))
+
+        frame_count += 1
 
     pygame.display.update() 
     clock.tick(FPS)
