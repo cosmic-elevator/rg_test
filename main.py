@@ -53,8 +53,8 @@ keysounds_1 = [pygame.mixer.Sound('fx/keysound_perfect_1.wav'), pygame.mixer.Sou
 
 ### 0: 곡 제목 / 1: 아티스트 이름 / 2: 장르명 / 3: 앨범커버 (380x380) / 4: 아이캐치 / 5: 곡 하이라이트 파일 / 6: 곡 전체 파일 / 7: 패턴 위치 문자열
 song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png').convert(), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/jumuck.bms"], 
-                  ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png').convert(), pygame.image.load('img/our_rhythmetric_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/our_rhythmetric.wav'), pygame.mixer.Sound('song/our_rhythmetric.wav'), None], 
-                  ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png').convert(), pygame.image.load('img/dreamcandy_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/dreamcandy.wav'), pygame.mixer.Sound('song/dreamcandy.wav'), None]
+                  ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png').convert(), pygame.image.load('img/our_rhythmetric_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/our_rhythmetric_old.wav'), pygame.mixer.Sound('song/our_rhythmetric.wav'), None], 
+                  ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png').convert(), pygame.image.load('img/dreamcandy_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/dreamcandy_old.wav'), pygame.mixer.Sound('song/dreamcandy.wav'), None]
                   ]
                 #["HAPPY FESTA DAY!!", "Team Tomsquare", "Complextro", pygame.image.load('img/dreamcandy_albumcover.png')]
 #eyecatch_list = [pygame.image.load('img/alpaca.jpeg')]
