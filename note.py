@@ -1,8 +1,8 @@
 import pygame
 from pygame.sprite import AbstractGroup
+from settings import *
 
-speed = 15
-FPS = 60
+initialize_speed()
 
 class Note(pygame.sprite.Sprite):
     def __init__(self, linenum, exact_hit_time):
@@ -18,11 +18,13 @@ class Note(pygame.sprite.Sprite):
         self.rect.y = 0
 
 
-    def drop(self):
-        self.rect.y += speed
+    def drop(self, spd):
+        self.rect.y += spd
+
+
 
         
-
+'''
 ## 롱노트의 꼬리를 별개의 객체로 만들어서 저장한다
 class Note_Tail(pygame.sprite.Sprite):
     def __init__(self, linenum, exact_hit_time, tail_time):
@@ -50,3 +52,4 @@ class Note_Tail(pygame.sprite.Sprite):
         #롱노트 길이 구하는 함수 ~~~~~~~~
         #music_playtime/1000 >= note.exact_hit_time - (500 / (FPS * speed)):
         return tail_time * FPS * speed
+'''
