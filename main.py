@@ -617,8 +617,12 @@ while is_running:
                         music_start_time = pygame.time.get_ticks()
                 if event.key == pygame.K_LEFT or event.key == pygame.K_DOWN:
                     speed -= 1
+                    if speed < 5:
+                        speed = 5
                 if event.key == pygame.K_RIGHT or event.key == pygame.K_UP:
                     speed += 1
+                    if speed > 35:
+                        speed = 35
 
         SCREEN.fill(BLACK)
         music_playtime = pygame.time.get_ticks() - music_start_time
