@@ -26,7 +26,7 @@ white_alpha_bg = pygame.image.load('img/white_alpha_bg.png').convert_alpha()
 playbutton = pygame.image.load('img/playbutton.png').convert_alpha()
 forwardbutton = pygame.image.load('img/forwardbutton.png').convert_alpha()
 backbutton = pygame.image.load('img/backbutton.png').convert_alpha()
-tutorial_img = pygame.image.load('img/tutorial_img.png').convert_alpha()
+tutorial_img = [pygame.image.load('img/tutorial_img.png').convert_alpha(), pygame.image.load('img/tutorial_img_2.png').convert_alpha()]
 ap_img = pygame.image.load('img/allperfect.png').convert_alpha()
 fc_img = pygame.image.load('img/fullcombo.png').convert_alpha()
 song_select_fx = pygame.mixer.Sound('fx/song_select_fx.wav')    # 효과음이 구림 ...
@@ -87,6 +87,7 @@ SoundFXChannel = pygame.mixer.Channel(2)
 PlayingMusicChannel = pygame.mixer.Channel(3)
 
 clock = pygame.time.Clock()
+tutorial_dialogue_num = False
 is_tutorial = False
 frame_count = 0
 
@@ -118,9 +119,8 @@ cur_pattern = None
 
 ## 곡 프리뷰를 반복 재생하는 함수
 def preview_play(cursor):
-    if gamemode == 1:
-        if (not BgMusicChannel.get_busy() or BgMusicChannel.get_sound() != song_info_list[songlist_cursor][5]):
-            BgMusicChannel.play(song_info_list[cursor][5])
+    if gamemode == 1 and (not BgMusicChannel.get_busy() or BgMusicChannel.get_sound() != song_info_list[songlist_cursor][5]):
+        BgMusicChannel.play(song_info_list[cursor][5])
 
 ## 커서에 해당하는 음악을 재생하는 함수
 def music_play(cursor):
@@ -260,6 +260,7 @@ def timing(note):
         SoundFXChannel.play(keysounds_1[4])
         timing_count[4] += 1
 
+
 def miss_check(n):
     global combo
     global rate
@@ -312,16 +313,16 @@ def render_result_texts(grade, clearrate, score, perfect_num, great_num, good_nu
 
 ## 튜토리얼을 출력하는 함수
 def show_tutorial():
-    if is_tutorial:
+    if (is_tutorial and tutorial_dialogue_num) or (gamemode == 1 and tutorial_dialogue_num == 1):
         #pygame.draw.rect(SCREEN, BLACK, (WIDTH/2-500, HEIGHT/2-250, 1000, 500))
         SCREEN.blit(black_alpha_bg, (0, 0))
-        SCREEN.blit(tutorial_img, (30, 0))
+        SCREEN.blit(tutorial_img[tutorial_dialogue_num-1], (30, 0))
 
 
 while is_running:
     if gamemode == 0:       ## 시작 화면
         pygame.mixer.stop()
-        is_tutorial = False
+        tutorial_dialogue_num = 0
         SCREEN.blit(startscreen_img, (0, 0))
         SCREEN.blit(start_text, start_text.get_rect(center=(WIDTH/2, 600)))
         for event in pygame.event.get():
@@ -329,8 +330,10 @@ while is_running:
                 is_running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
+                    tutorial_dialogue_num = 1
                     is_tutorial = True
-                    play_init(song_info_list[0][7])
+                    songlist_cursor = 0
+                    play_init('pattern/tutorial.bms')
                     song_selected_time = pygame.time.get_ticks()
                     gamemode = 2    # T를 누르면 튜토리얼 플레이 화면으로 전환
                 elif event.key == pygame.K_SPACE:
@@ -363,14 +366,14 @@ while is_running:
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if is_tutorial:
-                        is_tutorial = False
+                    if tutorial_dialogue_num:
+                        tutorial_dialogue_num = 0
                     else:
                         gamemode = 0
 
                 if event.key == pygame.K_SPACE:
-                    if is_tutorial:
-                        is_tutorial = False
+                    if tutorial_dialogue_num:
+                        tutorial_dialogue_num = 0
                     else:
                         BgMusicChannel.stop()
                         SoundFXChannel.play(song_select_fx)
@@ -378,7 +381,7 @@ while is_running:
                         gamemode = 2
   
                 if event.key == pygame.K_1:
-                    is_tutorial = True
+                    tutorial_dialogue_num = 1
 
                 if event.key == pygame.K_2:
                     #print('아직 구현하지 못했습니다.')
@@ -403,6 +406,8 @@ while is_running:
                     SoundFXChannel.play(song_select_fx)
                     play_init(song_info_list[songlist_cursor][7])
                     gamemode = 2
+
+        is_tutorial = False
 
         SCREEN.blit(song_info_list[songlist_cursor][4], (0, 0))
         SCREEN.blit(black_alpha_bg, (0, 0))
@@ -470,12 +475,18 @@ while is_running:
                 if event.key == pygame.K_ESCAPE:
                     PlayingMusicChannel.stop()
                     if is_tutorial:
-                        is_tutorial = False
-                    gamemode = 1
+                        tutorial_dialogue_num = 0
+                        gamemode = 0
+                    else:
+                        gamemode = 1
 
                 if event.key == pygame.K_SPACE: 
-                    if is_tutorial:
-                        is_tutorial = False
+                    if tutorial_dialogue_num == 1:
+                        tutorial_dialogue_num = 0
+                    elif tutorial_dialogue_num == 2:
+                        tutorial_dialogue_num = 0
+                        gamemode = 1
+                        
                     elif music_playtime == 0:
                         music_play(songlist_cursor)
                         music_start_time = pygame.time.get_ticks()
@@ -546,8 +557,11 @@ while is_running:
                     is_fc = True
 
             if music_playtime > song_info_list[songlist_cursor][6].get_length() * 1000 + 5000:
-                render_result_texts(None, None, play_score, timing_count[0], timing_count[1], timing_count[2], timing_count[3], timing_count[4], timing_count[5])
-                gamemode = 3
+                if is_tutorial:
+                    tutorial_dialogue_num = 2
+                else:
+                    render_result_texts(None, None, play_score, timing_count[0], timing_count[1], timing_count[2], timing_count[3], timing_count[4], timing_count[5])
+                    gamemode = 3
 
         #SCREEN.blit(bigfont.render(str(music_playtime/1000), True, WHITE), (20, 20))
         SCREEN.blit(bigfont.render("SCORE: " + str(round(play_score)), True, WHITE), (50, 580))
@@ -555,6 +569,7 @@ while is_running:
 
 
         show_tutorial()
+
 
     if gamemode == 3:    # 리절트 창
         for event in pygame.event.get():

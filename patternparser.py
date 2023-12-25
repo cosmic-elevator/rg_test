@@ -161,6 +161,4 @@ class Pattern():
     
 
 
-test_pt = Pattern('pattern/test.bms')
-for i in test_pt.notetail_1:
-    print(i.tail_length)
+

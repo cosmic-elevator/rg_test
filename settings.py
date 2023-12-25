@@ -1,7 +1,7 @@
 
 def initialize_speed():
     global speed
-    speed = 15
+    speed = 10
 
 
 WIDTH = 1280
