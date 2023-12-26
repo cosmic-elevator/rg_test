@@ -18,7 +18,7 @@ pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUS
 
 pink_keybeam = pygame.image.load('img/pink_keybeam.png').convert_alpha()
 
-startscreen_img = pygame.image.load('img/rhythmetric_main.png').convert()
+startscreen_img = pygame.image.load('img/rhythmetric_main.png').convert_alpha()
 cover_gradient_bg = pygame.image.load('img/cover_gradient_bg.png').convert_alpha()
 alpaca_bg = pygame.image.load('img/alpaca.jpeg').convert_alpha()
 black_alpha_bg = pygame.image.load('img/black_alpha_bg.png').convert_alpha()
@@ -47,7 +47,6 @@ song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('
                   ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png').convert(), pygame.image.load('img/dreamcandy_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/dreamcandy_old.wav'), pygame.mixer.Sound('song/dreamcandy.wav'), None]
                   ]
                 #["HAPPY FESTA DAY!!", "Team Tomsquare", "Complextro", pygame.image.load('img/dreamcandy_albumcover.png')]
-#eyecatch_list = [pygame.image.load('img/alpaca.jpeg')]
 
 #print(song_info_list[0][6].get_length())
 
@@ -66,6 +65,7 @@ testplayer_text = mediumfont.render("Test Players : 박대선, 어아름, 이보
 everyone_text = mediumfont.render("그리고 Rhythmetric을 즐겨주시는 여러분들", True, WHITE)
 thanks_text = bigfont.render("정말 감사드립니다!", True, WHITE)
 
+dirty_rects = []
 
 is_running = True
 gamemode = 0
@@ -209,11 +209,10 @@ def drop_notes():
     
 
 ## 키를 누른 시간과 노트 시간의 차이인 오차 시간을 측정한 뒤, 판정을 결정하는 함수
-def timing(note):
-    global rate, combo, key_press_time, play_score, timing_time
+def timing(note, cur_time):
+    global rate, combo, play_score, timing_time
     
-    key_press_time = pygame.time.get_ticks()
-    diff_time = key_press_time - note.exact_hit_time * 1000 - music_start_time
+    diff_time = cur_time - note.exact_hit_time * 1000 - music_start_time
     print(diff_time)
     
     # 판정은 넉넉하게, 세부 판정(점수)를 짜게 (판정은 잘 나오니까 기분은 좋고 / 점수는 변별이 되고)
@@ -222,7 +221,7 @@ def timing(note):
         rate = 0
         remove_note(note)
         combo += 1
-        timing_time = pygame.time.get_ticks()
+        timing_time = cur_time
         play_score += 100000 / cur_pattern.note_add_status
         SoundFXChannel.play(keysounds_1[0])
         timing_count[0] += 1
@@ -231,7 +230,7 @@ def timing(note):
         rate = 1
         remove_note(note)
         combo += 1
-        timing_time = pygame.time.get_ticks()
+        timing_time = cur_time
         play_score += 85000 / cur_pattern.note_add_status
         SoundFXChannel.play(keysounds_1[1])
         timing_count[1] += 1
@@ -240,7 +239,7 @@ def timing(note):
         rate = 2
         remove_note(note)
         combo += 1
-        timing_time = pygame.time.get_ticks()
+        timing_time = cur_time
         play_score += 60000 / cur_pattern.note_add_status
         SoundFXChannel.play(keysounds_1[2])
         timing_count[2] += 1
@@ -249,7 +248,7 @@ def timing(note):
         rate = 3
         remove_note(note)
         combo = 0
-        timing_time = pygame.time.get_ticks()
+        timing_time = cur_time
         play_score += 38000 / cur_pattern.note_add_status
         SoundFXChannel.play(keysounds_1[3])
         timing_count[3] += 1
@@ -258,10 +257,10 @@ def timing(note):
         rate = 4
         remove_note(note)
         combo = 0
-        timing_time = pygame.time.get_ticks()
+        timing_time = cur_time
         SoundFXChannel.play(keysounds_1[4])
         timing_count[4] += 1
-    #show_timing(rate)
+
 
 def miss_check(n):
     global combo
@@ -274,7 +273,6 @@ def miss_check(n):
         rate = 5
         miss_check_time = pygame.time.get_ticks()
         timing_count[5] += 1
-        #show_timing(rate)
         if type(n) == Note:
             remove_note(n)
         #elif type(n) == Note_Tail:
@@ -282,8 +280,8 @@ def miss_check(n):
         
 
 ## 판정 이미지를 출력하는 함수 
-def show_timing(rate):
-    if pygame.time.get_ticks() - timing_time < 250 or pygame.time.get_ticks() - miss_check_time < 250:
+def show_timing(rate, cur_time):
+    if cur_time - timing_time < 250 or cur_time - miss_check_time < 250:
         try:      # 0.25초 동안 판정 보여주기 
             SCREEN.blit(timing_img_list[rate], (490, 400))
         except IndexError:
@@ -291,9 +289,9 @@ def show_timing(rate):
 
 
 ## 콤보 폰트를 출력하는 함수 
-def show_combo():
+def show_combo(cur_time):
     global combo
-    if pygame.time.get_ticks() - key_press_time < 250:
+    if cur_time - timing_time < 250:
         combo_text = combofont.render(str(combo), True, WHITE)
         SCREEN.blit(combo_text, combo_text.get_rect(center=(WIDTH/2, 200)))
 
@@ -452,7 +450,7 @@ while is_running:
         pygame.draw.rect(SCREEN, YELLOW, [WIDTH/2-200, HEIGHT/2+140, 400, 10])   # 540, 500, 200, 10
         # 나중에 bga / 아이캐치 / 기어 추가 
 
-        pygame.event.pump()
+        cur_time = pygame.time.get_ticks()
 
         if pygame.key.get_pressed()[pygame.K_d]:
             SCREEN.blit(pink_keybeam, (440, 0))
@@ -498,25 +496,25 @@ while is_running:
                 if event.key == pygame.K_d:
                     if music_start_time > 0:
                         try:
-                            timing(cur_pattern.noteq_1[0])
+                            timing(cur_pattern.noteq_1[0], cur_time)
                         except IndexError:
                             continue
                 if event.key == pygame.K_f:
                     if music_start_time > 0:
                         try:
-                            timing(cur_pattern.noteq_2[0])
+                            timing(cur_pattern.noteq_2[0], cur_time)
                         except IndexError:
                             continue
                 if event.key == pygame.K_j:
                     if music_start_time > 0:
                         try:
-                            timing(cur_pattern.noteq_3[0])
+                            timing(cur_pattern.noteq_3[0], cur_time)
                         except IndexError:
                             continue
                 if event.key == pygame.K_k:
                     if music_start_time > 0:
                         try:
-                            timing(cur_pattern.noteq_4[0])
+                            timing(cur_pattern.noteq_4[0], cur_time)
                         except IndexError:
                             continue
 
@@ -524,11 +522,11 @@ while is_running:
         if music_start_time > 0:    # and music_playtime <= song_info_list[songlist_cursor][6].get_length() * 1000
             if cur_pattern:
                 drop_notes()
-                show_timing(rate)
-                show_combo()
+                show_timing(rate, cur_time)
+                show_combo(cur_time)
                 check_max_combo()
 
-                music_playtime = pygame.time.get_ticks() - music_start_time
+                music_playtime = cur_time - music_start_time
                 if cur_pattern.noteq_1:                   
                     miss_check(cur_pattern.noteq_1[0])
                 if cur_pattern.noteq_2:                   
