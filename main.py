@@ -43,7 +43,7 @@ keysounds_1 = [pygame.mixer.Sound('fx/keysound_perfect_1.wav'), pygame.mixer.Sou
 
 ### 0: 곡 제목 / 1: 아티스트 이름 / 2: 장르명 / 3: 앨범커버 (380x380) / 4: 아이캐치 / 5: 곡 하이라이트 파일 / 6: 곡 전체 파일 / 7: 패턴 위치 문자열
 song_info_list = [["주먹 쥐고", "sj", "Children's Song", pygame.image.load('img/jumuck_albumcover.png').convert(), pygame.image.load('img/jumuck_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/tutorial.wav'),  pygame.mixer.Sound('song/tutorial.wav'), "pattern/jumuck.bms"], 
-                  ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png').convert(), pygame.image.load('img/our_rhythmetric_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/our_rhythmetric_old.wav'), pygame.mixer.Sound('song/our_rhythmetric.wav'), None], 
+                  ["Our Rhythmetric", "YTS", "Dance Rock", pygame.image.load('img/our_rhythmetric_albumcover.png').convert(), pygame.image.load('img/our_rhythmetric_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/our_rhythmetric_old.wav'), pygame.mixer.Sound('song/our_rhythmetric.wav'), "pattern/our_rhythmetric_pt.bms"], 
                   ["Dreamcandy", "PerAl", "Kawaii Chiptune", pygame.image.load('img/dreamcandy_albumcover.png').convert(), pygame.image.load('img/dreamcandy_eyecatch.png').convert_alpha(), pygame.mixer.Sound('song/dreamcandy_old.wav'), pygame.mixer.Sound('song/dreamcandy.wav'), None]
                   ]
                 #["HAPPY FESTA DAY!!", "Team Tomsquare", "Complextro", pygame.image.load('img/dreamcandy_albumcover.png')]
@@ -97,13 +97,14 @@ global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_
 
 ## 게임 플레이 변수를 초기화하는 함수
 def play_init(cur_pattern_path):
-    global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, music_start_time, music_playtime, is_ap, is_fc
+    global combo, max_combo, rate, key_press_time, miss_check_time, play_score, cur_pattern, timing_count, music_start_time, music_playtime, is_ap, is_fc, timing_time 
     
     cur_pattern = Pattern(cur_pattern_path)
     combo = 0
     max_combo = 0
     rate = 6
     key_press_time = 0
+    timing_time = 0
     miss_check_time = 0
     play_score = 0
     music_start_time = 0
@@ -209,7 +210,7 @@ def drop_notes():
 
 ## 키를 누른 시간과 노트 시간의 차이인 오차 시간을 측정한 뒤, 판정을 결정하는 함수
 def timing(note):
-    global rate, combo, key_press_time, play_score
+    global rate, combo, key_press_time, play_score, timing_time
     
     key_press_time = pygame.time.get_ticks()
     diff_time = key_press_time - note.exact_hit_time * 1000 - music_start_time
@@ -221,7 +222,7 @@ def timing(note):
         rate = 0
         remove_note(note)
         combo += 1
-        #play_score += 900
+        timing_time = pygame.time.get_ticks()
         play_score += 100000 / cur_pattern.note_add_status
         SoundFXChannel.play(keysounds_1[0])
         timing_count[0] += 1
@@ -230,7 +231,7 @@ def timing(note):
         rate = 1
         remove_note(note)
         combo += 1
-        #play_score += 440
+        timing_time = pygame.time.get_ticks()
         play_score += 85000 / cur_pattern.note_add_status
         SoundFXChannel.play(keysounds_1[1])
         timing_count[1] += 1
@@ -239,7 +240,7 @@ def timing(note):
         rate = 2
         remove_note(note)
         combo += 1
-        #play_score += 210
+        timing_time = pygame.time.get_ticks()
         play_score += 60000 / cur_pattern.note_add_status
         SoundFXChannel.play(keysounds_1[2])
         timing_count[2] += 1
@@ -248,7 +249,7 @@ def timing(note):
         rate = 3
         remove_note(note)
         combo = 0
-        #play_score += 100
+        timing_time = pygame.time.get_ticks()
         play_score += 38000 / cur_pattern.note_add_status
         SoundFXChannel.play(keysounds_1[3])
         timing_count[3] += 1
@@ -257,9 +258,10 @@ def timing(note):
         rate = 4
         remove_note(note)
         combo = 0
+        timing_time = pygame.time.get_ticks()
         SoundFXChannel.play(keysounds_1[4])
         timing_count[4] += 1
-
+    #show_timing(rate)
 
 def miss_check(n):
     global combo
@@ -272,6 +274,7 @@ def miss_check(n):
         rate = 5
         miss_check_time = pygame.time.get_ticks()
         timing_count[5] += 1
+        #show_timing(rate)
         if type(n) == Note:
             remove_note(n)
         #elif type(n) == Note_Tail:
@@ -280,7 +283,7 @@ def miss_check(n):
 
 ## 판정 이미지를 출력하는 함수 
 def show_timing(rate):
-    if pygame.time.get_ticks() - key_press_time < 250 or pygame.time.get_ticks() - miss_check_time < 250:
+    if pygame.time.get_ticks() - timing_time < 250 or pygame.time.get_ticks() - miss_check_time < 250:
         try:      # 0.25초 동안 판정 보여주기 
             SCREEN.blit(timing_img_list[rate], (490, 400))
         except IndexError:
@@ -474,6 +477,7 @@ while is_running:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     PlayingMusicChannel.stop()
+                    play_init('pattern/tutorial.bms')
                     if is_tutorial:
                         tutorial_dialogue_num = 0
                         gamemode = 0
@@ -590,11 +594,11 @@ while is_running:
         SCREEN.blit(mediumfont.render("PLAY RESULT", True, BLACK), (50, 15))
         #pygame.draw.rect(SCREEN, GREEN, (240, 100, 350, 350))
         
-        if play_score < 60000:
+        if play_score < 20000:
             SCREEN.blit(pygame.transform.scale(grade_img_list[0], (330, 330)), (250, 130))
-        elif play_score < 70000:
+        elif play_score < 40000:
             SCREEN.blit(pygame.transform.scale(grade_img_list[1], (330, 330)), (250, 130))
-        elif play_score < 80000:
+        elif play_score < 60000:
             SCREEN.blit(pygame.transform.scale(grade_img_list[2], (330, 330)), (250, 130))
         elif play_score < 90000:
             SCREEN.blit(pygame.transform.scale(grade_img_list[3], (330, 330)), (250, 130))
